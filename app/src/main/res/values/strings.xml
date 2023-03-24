@@ -3,4 +3,9 @@
     <string name="back_button">뒤로가기 버튼</string>
     <string name="hint">검색어를 입력하세요</string>
     <string name="add_item">항목 추가</string>
+    <string name="save">저장</string>
+    <string name="pick_date">날짜를 고르세요</string>
+    <string name="input_product_name">제품명을 입력하세요</string>
+    <string name="input_price">가격을 입력하세요</string>
+    <string name="input_quantity">수량을 입력하세요</string>
 </resources>

@@ -114,9 +114,9 @@ fun HomeSearchBar(
 // 메인화면 아이템 카드 컴포저블 (여러 카드에서 재사용 가능하도록 구성)
 @Composable
 fun HomeItemCard(
+    modifier: Modifier = Modifier,
     text: String,
     onCardClicked: () -> Unit = {  },
-    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier

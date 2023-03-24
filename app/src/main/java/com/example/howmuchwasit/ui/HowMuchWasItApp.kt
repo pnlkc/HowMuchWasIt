@@ -1,5 +1,8 @@
 package com.example.howmuchwasit.ui
 
+import android.content.res.Resources.Theme
+import android.graphics.LightingColorFilter
+import androidx.compose.foundation.background
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
