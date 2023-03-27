@@ -3,8 +3,12 @@ package com.example.howmuchwasit.ui.item
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import android.provider.Settings.Secure.getString
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActionScope
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
@@ -15,8 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
@@ -33,6 +40,11 @@ fun ItemAddScreen(
     modifier: Modifier = Modifier,
     canNavigateBack: Boolean = true,
 ) {
+
+    BackHandler {
+
+    }
+
     Scaffold(topBar = {
         HowMuchWasItTopAppBar(
             title = stringResource(id = NavigationDestination.AddItem.titleRes),
@@ -73,17 +85,26 @@ fun ItemInputForm(
 
         ItemAddTextField(
             placeholderText = stringResource(id = R.string.input_product_name),
-            leadingIconPainter = painterResource(id = R.drawable.product_name)
+            leadingIconPainter = painterResource(id = R.drawable.product_name),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
         )
 
         ItemAddTextField(
             placeholderText = stringResource(id = R.string.input_price),
-            leadingIconPainter = painterResource(id = R.drawable.price)
+            leadingIconPainter = painterResource(id = R.drawable.price),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            )
         )
 
         ItemAddTextField(
             placeholderText = stringResource(id = R.string.input_quantity),
-            leadingIconPainter = painterResource(id = R.drawable.quantity)
+            leadingIconPainter = painterResource(id = R.drawable.quantity),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            )
         )
 
         Box(modifier = modifier.weight(1f))
@@ -157,6 +178,7 @@ fun ItemAddTextField(
     modifier: Modifier = Modifier,
     placeholderText: String,
     leadingIconPainter: Painter? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var text by remember { mutableStateOf("") }
 
@@ -165,6 +187,8 @@ fun ItemAddTextField(
         handleColor = MediumSlateBlue,
         backgroundColor = MediumSlateBlue.copy(alpha = 0.2f)
     )
+
+    val focusManager = LocalFocusManager.current
 
     // customTextSelectionColors 값 적용
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
@@ -200,6 +224,8 @@ fun ItemAddTextField(
             ),
             textStyle = Typography.body2,
             singleLine = true,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = KeyboardActions (onDone = { focusManager.clearFocus() } ),
             modifier = modifier
                 .fillMaxWidth(),
         )
@@ -214,7 +240,6 @@ fun ItemAddButton(
 ) {
     Button(
         onClick = onSaveClick,
-//        enabled = itemUiState.actionEnabled,
         modifier = modifier
             .fillMaxWidth(),
         shape = Shapes.medium,
