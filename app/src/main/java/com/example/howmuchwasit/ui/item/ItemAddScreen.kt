@@ -2,11 +2,9 @@ package com.example.howmuchwasit.ui.item
 
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
-import android.provider.Settings.Secure.getString
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -15,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
@@ -25,25 +24,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
+import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 // 아이템 추가 화면 컴포저블
 @Composable
 fun ItemAddScreen(
+    modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
     canNavigateBack: Boolean = true,
+    viewModel: ItemAddViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-
-    BackHandler {
-
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
         HowMuchWasItTopAppBar(
@@ -53,7 +51,16 @@ fun ItemAddScreen(
         )
     }) { innerPadding ->
         ItemAddBody(
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding),
+            navigateBack = navigateBack,
+            itemUiState = viewModel.itemUiState,
+            onItemValueChanged = viewModel::updateItemUiState,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveItem()
+                    navigateBack()
+                }
+            }
         )
     }
 }
@@ -62,6 +69,10 @@ fun ItemAddScreen(
 @Composable
 fun ItemAddBody(
     modifier: Modifier = Modifier,
+    navigateBack: () -> Unit,
+    itemUiState: ItemUiState,
+    onItemValueChanged: (ItemUiState) -> Unit,
+    onSaveClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -69,7 +80,18 @@ fun ItemAddBody(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
-        ItemInputForm()
+        ItemInputForm(
+            navigateBack = navigateBack,
+            itemUiState = itemUiState,
+            onItemValueChanged = onItemValueChanged
+        )
+
+        Box(modifier = modifier.weight(1f))
+
+        ItemAddButton(
+            itemUiState = itemUiState,
+            onSaveClick = onSaveClick
+        )
     }
 }
 
@@ -77,16 +99,38 @@ fun ItemAddBody(
 @Composable
 fun ItemInputForm(
     modifier: Modifier = Modifier,
+    navigateBack: () -> Unit,
+    itemUiState: ItemUiState,
+    onItemValueChanged: (ItemUiState) -> Unit,
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    // 포커스 관리하는 포커스 매니저
+    val focusManager = LocalFocusManager.current
+
+    // 백버튼 동작 설정하는 코드
+    BackHandler {
+        if (isFocused) focusManager.clearFocus() else navigateBack()
+    }
+
     Column(
-        modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { isFocused = it.hasFocus },
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        DatePickTextField()
+        DatePickTextField(
+            itemUiState = itemUiState,
+            onItemValueChanged = onItemValueChanged
+        )
 
         ItemAddTextField(
             placeholderText = stringResource(id = R.string.input_product_name),
             leadingIconPainter = painterResource(id = R.drawable.product_name),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            value = itemUiState.name,
+            itemUiState = itemUiState,
+            onItemValueChanged = onItemValueChanged
         )
 
         ItemAddTextField(
@@ -95,7 +139,10 @@ fun ItemInputForm(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
-            )
+            ),
+            value = itemUiState.price,
+            itemUiState = itemUiState,
+            onItemValueChanged = onItemValueChanged
         )
 
         ItemAddTextField(
@@ -104,12 +151,11 @@ fun ItemInputForm(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
-            )
+            ),
+            value = itemUiState.quantity,
+            itemUiState = itemUiState,
+            onItemValueChanged = onItemValueChanged
         )
-
-        Box(modifier = modifier.weight(1f))
-
-        ItemAddButton()
     }
 }
 
@@ -117,17 +163,16 @@ fun ItemInputForm(
 @Composable
 fun DatePickTextField(
     modifier: Modifier = Modifier,
+    itemUiState: ItemUiState,
+    onItemValueChanged: (ItemUiState) -> Unit,
 ) {
-    // calendar, dataState는 뷰모델로 이동 예정
+    // Calender 인스턴스 생성
     val calendar = Calendar.getInstance()
-    val currentDate = DateTimeFormatter.ofPattern("yyyy / M / d").format(LocalDate.now())
-    var dateState by remember { mutableStateOf(currentDate) }
-
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _, year, month, day ->
-            dateState = "$year / $month / $day"
+            onItemValueChanged(itemUiState.copy(date = "$year / $month / $day"))
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -135,7 +180,7 @@ fun DatePickTextField(
     )
 
     OutlinedTextField(
-        value = dateState,
+        value = itemUiState.date,
         onValueChange = { },
         enabled = false,
         leadingIcon = {
@@ -143,7 +188,7 @@ fun DatePickTextField(
                 painter = painterResource(id = R.drawable.baseline_event_available_24),
                 contentDescription = null,
                 tint = Black,
-                modifier = modifier.padding(vertical = 24.dp)
+                modifier = modifier.padding(vertical = 16.dp)
             )
         },
         placeholder = {
@@ -179,22 +224,40 @@ fun ItemAddTextField(
     placeholderText: String,
     leadingIconPainter: Painter? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    value: String,
+    itemUiState: ItemUiState,
+    onItemValueChanged: (ItemUiState) -> Unit,
 ) {
-    var text by remember { mutableStateOf("") }
-
     // 텍스트 선택 손잡이(textSelectHandle), 텍스트 선택 배경(textColorHighlight) 변경
     val customTextSelectionColors = TextSelectionColors(
         handleColor = MediumSlateBlue,
         backgroundColor = MediumSlateBlue.copy(alpha = 0.2f)
     )
 
+    // 포커스 관리하는 포커스 매니저
     val focusManager = LocalFocusManager.current
+
+    // getString() 사용하기 위한 context
+    val context = LocalContext.current
+
+    // price와 quantity 값이 Int 범위를 넘지 않도록 길이 제한
+    val maxLength = 9
 
     // customTextSelectionColors 값 적용
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         OutlinedTextField(
-            value = text,
-            onValueChange = { input -> text = input },
+            value = value,
+            onValueChange = {
+                when (placeholderText) {
+                    context.getString(R.string.input_product_name) -> {
+                        onItemValueChanged(itemUiState.copy(name = it))
+                    }
+                    context.getString(R.string.input_price) -> {
+                        if (it.length <= maxLength) onItemValueChanged(itemUiState.copy(price = it))
+                    }
+                    else -> if (it.length <= maxLength) onItemValueChanged(itemUiState.copy(quantity = it))
+                }
+            },
             leadingIcon = if (leadingIconPainter == null) {
                 null
             } else {
@@ -203,7 +266,7 @@ fun ItemAddTextField(
                         painter = leadingIconPainter,
                         contentDescription = null,
                         tint = Black,
-                        modifier = modifier.padding(vertical = 24.dp)
+                        modifier = modifier.padding(vertical = 16.dp)
                     )
                 }
             },
@@ -225,7 +288,12 @@ fun ItemAddTextField(
             textStyle = Typography.body2,
             singleLine = true,
             keyboardOptions = keyboardOptions,
-            keyboardActions = KeyboardActions (onDone = { focusManager.clearFocus() } ),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            isError = when (placeholderText) {
+                context.getString(R.string.input_price) -> !itemUiState.isPriceDigitsOnly()
+                context.getString(R.string.input_quantity) -> !itemUiState.isQuantityDigitsOnly()
+                else -> false
+            },
             modifier = modifier
                 .fillMaxWidth(),
         )
@@ -236,16 +304,20 @@ fun ItemAddTextField(
 @Composable
 fun ItemAddButton(
     modifier: Modifier = Modifier,
-    onSaveClick: () -> Unit = { },
+    itemUiState: ItemUiState,
+    onSaveClick: () -> Unit,
 ) {
     Button(
         onClick = onSaveClick,
+        enabled = itemUiState.isValid(),
         modifier = modifier
             .fillMaxWidth(),
         shape = Shapes.medium,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Portage,
-            contentColor = White
+            contentColor = White,
+            disabledBackgroundColor = Gray,
+            disabledContentColor = White
         ),
         elevation = null
     ) {
