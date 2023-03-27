@@ -31,4 +31,5 @@
 - ItemRepository 구현
 - ItemAddViewModel 및 AppViewModelProvider 구현 
 - ItemUiState 구현
+- DI 활용을 위한 Container, Application 구현
 <br>
