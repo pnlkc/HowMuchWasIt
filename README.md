@@ -22,5 +22,13 @@
 <br>
 
 ### 230324
-- 아이템 추가 화면 compose 구현
-- HowMuchWasItDatabase 구현
+- 아이템 추가 화면의 전체적인 UI를 compose로 구현
+- HowMuchWasIt앱의 Room Database 구현
+<br>
+
+### 230327
+- 아이템 추가 화면 수정 : TextField 에러, 키보드 옵션, 키보드 액션, 길이 제한
+- ItemRepository 구현
+- ItemAddViewModel 및 AppViewModelProvider 구현 
+- ItemUiState 구현
+<br>
