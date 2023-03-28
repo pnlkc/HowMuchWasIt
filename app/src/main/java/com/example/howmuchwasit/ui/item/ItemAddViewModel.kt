@@ -17,7 +17,7 @@ class ItemAddViewModel(
         private set
 
     init {
-        initDateItemUiState()
+        initItemUiState()
     }
 
     // itemUiState 값 업데이트
@@ -25,10 +25,13 @@ class ItemAddViewModel(
         itemUiState = newItemUiState.copy(canSave = newItemUiState.isValid())
     }
 
-    // 현재 날짜로 초기화
-    private fun initDateItemUiState() {
+    // ItemUiState 초기값 설정
+    private fun initItemUiState() {
         val currentDate = DateTimeFormatter.ofPattern("yyyy / M / d").format(LocalDate.now())
-        itemUiState = itemUiState.copy(date = currentDate)
+        itemUiState = itemUiState.copy(
+            date = currentDate,
+            quantity = "1"
+        )
     }
 
     // 아이템 저장 기능

@@ -8,4 +8,5 @@
     <string name="input_product_name">제품명을 입력하세요</string>
     <string name="input_price">가격을 입력하세요</string>
     <string name="input_quantity">수량을 입력하세요</string>
+    <string name="all_item_list">전체 목록</string>
 </resources>

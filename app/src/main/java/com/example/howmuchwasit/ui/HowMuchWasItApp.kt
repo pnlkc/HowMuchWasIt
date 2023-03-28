@@ -27,9 +27,9 @@ fun HowMuchWasItApp(navController: NavHostController = rememberNavController()) 
 // 상단바 컴포저블
 @Composable
 fun HowMuchWasItTopAppBar(
+    modifier: Modifier = Modifier,
     title: String,
     canNavigateBack: Boolean,
-    modifier: Modifier = Modifier,
     navigateUp: () -> Unit = {  }
 ) {
     if (canNavigateBack) {

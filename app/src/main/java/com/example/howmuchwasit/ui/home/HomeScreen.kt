@@ -1,18 +1,19 @@
 package com.example.howmuchwasit.ui.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.Home
@@ -22,6 +23,7 @@ import com.example.howmuchwasit.ui.theme.*
 @Composable
 fun HomeScreen(
     navigateToAddItem: () -> Unit,
+    navigateToAllItemList: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -33,7 +35,8 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         HomeBody(
-            onCardClicked = navigateToAddItem,
+            onAddItemCardClicked = navigateToAddItem,
+            onAllItemListCardClicked = navigateToAllItemList,
             modifier = modifier.padding(innerPadding)
         )
     }
@@ -42,11 +45,19 @@ fun HomeScreen(
 // 메인 화면 Body 컴포저블
 @Composable
 fun HomeBody(
-    onCardClicked: () -> Unit,
+    onAddItemCardClicked: () -> Unit,
+    onAllItemListCardClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { focusManager.clearFocus() }
+            )
             .fillMaxSize()
             .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -60,18 +71,20 @@ fun HomeBody(
             HomeItemCard(
                 text = "추가",
                 modifier = modifier.weight(1f),
-                onCardClicked = onCardClicked
+                onCardClicked = onAddItemCardClicked
             )
 
             HomeItemCard(
                 text = "최근 항목",
-                modifier = modifier.weight(1f)
+                modifier = modifier.weight(1f),
+                onCardClicked = {  }
             )
         }
 
         HomeItemCard(
             text = "전체 목록",
-            modifier = modifier.weight(1f)
+            modifier = modifier.weight(1f),
+            onCardClicked = onAllItemListCardClicked
         )
 
         Box(modifier = modifier.size(12.dp))
@@ -83,14 +96,16 @@ fun HomeBody(
 fun HomeSearchBar(
     modifier: Modifier = Modifier,
 ) {
+    var text by remember { mutableStateOf("") }
+
     OutlinedTextField(
-        value = "",
-        onValueChange = { },
+        value = text,
+        onValueChange = { text = it },
         placeholder = {
             Text(
                 text = stringResource(id = R.string.hint),
                 color = Color.Gray,
-                fontSize = 20.sp,
+                style = Typography.h3,
             )
         },
         leadingIcon = {
@@ -101,6 +116,7 @@ fun HomeSearchBar(
             )
         },
         shape = Shapes.medium,
+        textStyle = Typography.h3,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = Portage,
             focusedBorderColor = MediumSlateBlue,
@@ -116,7 +132,7 @@ fun HomeSearchBar(
 fun HomeItemCard(
     modifier: Modifier = Modifier,
     text: String,
-    onCardClicked: () -> Unit = {  },
+    onCardClicked: () -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -132,7 +148,7 @@ fun HomeItemCard(
             Text(
                 text = text,
                 textAlign = TextAlign.Center,
-                style = Typography.body1,
+                style = Typography.h1,
                 modifier = Modifier.align(Alignment.Center)
             )
         }

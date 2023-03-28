@@ -15,7 +15,7 @@ sealed class NavigationDestination(val route: String, val titleRes: Int) {
 
 
     // 전체 아이템 리스트 화면
-
+    object AllItemList : NavigationDestination("all_item_list", R.string.all_item_list)
 
     // 아이템 세부정보 화면
 

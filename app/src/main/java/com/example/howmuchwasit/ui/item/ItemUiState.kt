@@ -21,7 +21,10 @@ fun ItemUiState.toItem() = Item(
     name = name,
     price = price.toInt(),
     quantity = quantity.toInt(),
+    onePrice = onProductPrice(),
 )
+
+fun ItemUiState.onProductPrice() = price.toInt() / quantity.toInt()
 
 
 fun ItemUiState.isPriceDigitsOnly() = price.isDigitsOnly()
@@ -31,6 +34,6 @@ fun ItemUiState.isQuantityDigitsOnly() = quantity.isDigitsOnly()
 fun ItemUiState.isValid(): Boolean {
     val nameCheck = name.isNotBlank()
     val priceCheck = price.isNotBlank() && isPriceDigitsOnly()
-    val quantityCheck = quantity.isNotBlank() && isQuantityDigitsOnly()
+    val quantityCheck = quantity.isNotBlank() && isQuantityDigitsOnly() && quantity.toInt() > 0
     return nameCheck && priceCheck && quantityCheck
 }

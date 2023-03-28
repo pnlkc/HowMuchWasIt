@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.icu.util.Calendar
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,19 +12,24 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.AppViewModelProvider
@@ -58,6 +64,7 @@ fun ItemAddScreen(
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.saveItem()
+                    // 전체 목록 화면으로 이동하도록 변경 예정
                     navigateBack()
                 }
             }
@@ -74,9 +81,16 @@ fun ItemAddBody(
     onItemValueChanged: (ItemUiState) -> Unit,
     onSaveClick: () -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { focusManager.clearFocus() }
+            )
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
@@ -86,7 +100,7 @@ fun ItemAddBody(
             onItemValueChanged = onItemValueChanged
         )
 
-        Box(modifier = modifier.weight(1f))
+        Spacer(modifier = modifier.weight(1f))
 
         ItemAddButton(
             itemUiState = itemUiState,
@@ -194,7 +208,7 @@ fun DatePickTextField(
         placeholder = {
             Text(
                 text = stringResource(id = R.string.pick_date),
-                style = Typography.body2,
+                style = Typography.h3,
                 color = Color.Gray
             )
         },
@@ -204,7 +218,7 @@ fun DatePickTextField(
             textColor = Black,
             disabledTextColor = Black
         ),
-        textStyle = Typography.body2,
+        textStyle = Typography.h3,
         // singleLine = true 설정 안 하면 center vertical 하지 않음
         singleLine = true,
         modifier = modifier
@@ -273,7 +287,7 @@ fun ItemAddTextField(
             placeholder = {
                 Text(
                     text = placeholderText,
-                    style = Typography.body2,
+                    style = Typography.h3,
                     color = Color.Gray
                 )
             },
@@ -285,7 +299,7 @@ fun ItemAddTextField(
                 textColor = Black,
                 disabledTextColor = Black
             ),
-            textStyle = Typography.body2,
+            textStyle = Typography.h3,
             singleLine = true,
             keyboardOptions = keyboardOptions,
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -323,7 +337,7 @@ fun ItemAddButton(
     ) {
         Text(
             text = stringResource(R.string.save),
-            style = Typography.body2,
+            style = Typography.h3,
             modifier = modifier
                 .padding(vertical = 10.dp)
         )
