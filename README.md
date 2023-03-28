@@ -22,7 +22,7 @@
 <br>
 
 ### 230324
-- 아이템 추가 화면의 전체적인 UI를 compose로 구현
+- 아이템 추가 화면 compose 구현
 - HowMuchWasIt앱의 Room Database 구현
 <br>
 
@@ -33,3 +33,9 @@
 - ItemUiState 구현
 - DI 활용을 위한 Container, Application 구현
 <br>
+
+### 230328
+- AllItemList 면 구현 compose 구현
+- AllItemListViewModel 구현
+- windowSoftInputMode - adjustResize 제거 : 메인 화면에서 뷰가 깨지는 현상 발생
+<
