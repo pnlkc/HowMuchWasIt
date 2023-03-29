@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import com.example.howmuchwasit.R
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.howmuchwasit.R
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
@@ -73,6 +73,7 @@ fun AllItemListBody(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AllItemLazyList(
     modifier: Modifier = Modifier,
@@ -88,6 +89,7 @@ fun AllItemLazyList(
     ) {
         items(items = itemList, key = { it.id }) { item ->
             LazyListItem(
+                modifier = modifier.animateItemPlacement(),
                 item = item,
                 onItemClick = onItemClick,
                 onItemLongClick = onItemLongClick
