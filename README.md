@@ -45,4 +45,5 @@
 - AllItemList 화면에서 아이템 롱클릭시 삭제 다이얼로그 보여주는 기능 추가
 - 아이템 새로 추가시 AllItemList 화면으로 이동하도록 변경
 - AllItemList에서 아이템 클릭시 ItemEdit 화면으로 이동하도록 설정 : Navigation Argument 사용
+- 아이템 삭제 시 애니메이션 추가 : items의 lazy item scope 안에서 modifier.animateItemPlacement() 설정
 <br>
