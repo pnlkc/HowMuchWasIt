@@ -69,20 +69,20 @@ fun HomeBody(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             HomeItemCard(
-                text = "추가",
+                text = stringResource(id = R.string.add),
                 modifier = modifier.weight(1f),
                 onCardClicked = onAddItemCardClicked
             )
 
             HomeItemCard(
-                text = "최근 항목",
+                text = stringResource(id = R.string.recent_item),
                 modifier = modifier.weight(1f),
                 onCardClicked = {  }
             )
         }
 
         HomeItemCard(
-            text = "전체 목록",
+            text = stringResource(id = R.string.all_item_list),
             modifier = modifier.weight(1f),
             onCardClicked = onAllItemListCardClicked
         )

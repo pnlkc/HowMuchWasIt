@@ -8,11 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.R
+import com.example.howmuchwasit.R
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -20,7 +19,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.AppViewModelProvider
@@ -219,20 +217,20 @@ fun DeleteDialog(
         onDismissRequest = onDeleteCancel,
         title = {
             Text(
-                text = "주의",
+                text = stringResource(id = R.string.caution),
                 style = Typography.h3
             )
         },
         text = {
             Text(
-                text = "이 항목을 삭제하시겠습니까?",
+                text = stringResource(id = R.string.confirm_delete),
                 style = Typography.body1
             )
         },
         dismissButton = {
             TextButton(onClick = onDeleteCancel) {
                 Text(
-                    text = "아니오",
+                    text = stringResource(id = R.string.no),
                     color = MediumSlateBlue,
                     style = Typography.body1
                 )
@@ -241,7 +239,7 @@ fun DeleteDialog(
         confirmButton = {
             TextButton(onClick = onDeleteConfirm) {
                 Text(
-                    text = "네",
+                    text = stringResource(id = R.string.yes),
                     color = MediumSlateBlue,
                     style = Typography.body1
                 )
