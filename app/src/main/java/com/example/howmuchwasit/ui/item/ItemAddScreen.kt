@@ -44,6 +44,7 @@ fun ItemAddScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
+    navigateToAllItemList: () -> Unit,
     canNavigateBack: Boolean = true,
     viewModel: ItemAddViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -64,8 +65,7 @@ fun ItemAddScreen(
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.saveItem()
-                    // 전체 목록 화면으로 이동하도록 변경 예정
-                    navigateBack()
+                    navigateToAllItemList()
                 }
             }
         )
@@ -186,7 +186,7 @@ fun DatePickTextField(
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _, year, month, day ->
-            onItemValueChanged(itemUiState.copy(date = "$year / $month / $day"))
+            onItemValueChanged(itemUiState.copy(date = "$year / ${month + 1} / $day"))
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),

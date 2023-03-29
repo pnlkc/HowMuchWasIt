@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class AllItemListViewModel(
-    itemRepository: ItemRepository
+    private val itemRepository: ItemRepository
 ) : ViewModel() {
     // private set으로 외부에서는 수정 불가능하게 설정
     val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getAllItemsStream()
@@ -28,6 +28,10 @@ class AllItemListViewModel(
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+    }
+
+    suspend fun deleteItem(item: Item) {
+        itemRepository.deleteItem(item = item)
     }
 }
 

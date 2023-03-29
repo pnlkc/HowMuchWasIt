@@ -1,39 +1,44 @@
 package com.example.howmuchwasit.ui.item
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.R
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.AppViewModelProvider
+import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
+import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun AllItemListScreen(
     modifier: Modifier = Modifier,
     navigateToHome: () -> Unit,
-    navigateToItemEdit: () -> Unit,
+    navigateToItemEdit: (Int) -> Unit,
     canNavigateBack: Boolean = true,
     viewModel: AllItemListViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val itemListUiState by viewModel.itemListUiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
         HowMuchWasItTopAppBar(
@@ -45,7 +50,12 @@ fun AllItemListScreen(
         AllItemListBody(
             modifier = modifier.padding(innerPadding),
             itemList = itemListUiState.itemList,
-            onItemClick = navigateToItemEdit
+            onItemClick = navigateToItemEdit,
+            onItemLongClick = {
+                coroutineScope.launch {
+                    viewModel.deleteItem(it)
+                }
+            }
         )
     }
 }
@@ -54,11 +64,14 @@ fun AllItemListScreen(
 fun AllItemListBody(
     modifier: Modifier = Modifier,
     itemList: List<Item>,
-    onItemClick: () -> Unit,
+    onItemClick: (Int) -> Unit,
+    onItemLongClick: (Item) -> Unit,
 ) {
     AllItemLazyList(
         itemList = itemList,
-        onItemClick = onItemClick
+        onItemClick = { onItemClick(it.id) },
+        modifier = modifier,
+        onItemLongClick = onItemLongClick
     )
 }
 
@@ -66,7 +79,8 @@ fun AllItemListBody(
 fun AllItemLazyList(
     modifier: Modifier = Modifier,
     itemList: List<Item>,
-    onItemClick: () -> Unit,
+    onItemClick: (Item) -> Unit,
+    onItemLongClick: (Item) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -77,23 +91,31 @@ fun AllItemLazyList(
         items(items = itemList, key = { it.id }) { item ->
             LazyListItem(
                 item = item,
-                onItemClick = onItemClick
+                onItemClick = onItemClick,
+                onItemLongClick = onItemLongClick
             )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyListItem(
     modifier: Modifier = Modifier,
     item: Item,
-    onItemClick: () -> Unit,
+    onItemClick: (Item) -> Unit,
+    onItemLongClick: (Item) -> Unit,
 ) {
+    var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp)
-            .clickable { onItemClick() },
+            .combinedClickable(
+                onClick = { onItemClick(item) },
+                onLongClick = { deleteConfirmationRequired = true }
+            ),
         elevation = 2.dp
     ) {
         Column(
@@ -119,20 +141,26 @@ fun LazyListItem(
             ) {
                 // AnnotatedString 생성 (Spannable String과 유사한 기능이지만 Compose 전용)
                 val nameSpannable = buildAnnotatedString {
-                    append(item.name)
-                    withStyle(style = SpanStyle(
-                        color = Gray,
-                        fontSize = Typography.h3.fontSize * 0.7f)
+                    withStyle(
+                        style = SpanStyle(fontWeight = FontWeight.Bold)
+                    ) {
+                        append(item.name)
+                    }
+
+                    withStyle(
+                        style = SpanStyle(
+                            color = Gray,
+                            fontSize = Typography.h3.fontSize * 0.7f
+                        )
                     ) {
                         append(if (item.quantity != 1) " (${item.quantity}개)" else "")
                     }
                 }
 
                 Text(
-//                    text = item.name + if (item.quantity != 1) " (${item.quantity}개)" else "",
                     text = nameSpannable,
                     style = Typography.h3,
-                    color = Black
+                    color = Black,
                 )
 
                 Column(
@@ -141,8 +169,10 @@ fun LazyListItem(
                 ) {
                     val priceSpannable = buildAnnotatedString {
                         append(item.price.toString())
-                        withStyle(style = SpanStyle(
-                            fontSize = Typography.h3.fontSize * 0.7f)
+                        withStyle(
+                            style = SpanStyle(
+                                fontSize = Typography.h3.fontSize * 0.7f
+                            )
                         ) {
                             append(" 원")
                         }
@@ -168,4 +198,56 @@ fun LazyListItem(
             }
         }
     }
+
+    if (deleteConfirmationRequired) {
+        DeleteDialog(
+            onDeleteCancel = { deleteConfirmationRequired = false },
+            onDeleteConfirm = {
+                deleteConfirmationRequired = false
+                onItemLongClick(item)
+            }
+        )
+    }
+}
+
+@Composable
+fun DeleteDialog(
+    onDeleteConfirm: () -> Unit,
+    onDeleteCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDeleteCancel,
+        title = {
+            Text(
+                text = "주의",
+                style = Typography.h3
+            )
+        },
+        text = {
+            Text(
+                text = "이 항목을 삭제하시겠습니까?",
+                style = Typography.body1
+            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDeleteCancel) {
+                Text(
+                    text = "아니오",
+                    color = MediumSlateBlue,
+                    style = Typography.body1
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDeleteConfirm) {
+                Text(
+                    text = "네",
+                    color = MediumSlateBlue,
+                    style = Typography.body1
+                )
+            }
+        },
+        backgroundColor = White,
+        contentColor = contentColorFor(backgroundColor = White)
+    )
 }
