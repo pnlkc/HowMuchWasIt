@@ -35,7 +35,14 @@
 <br>
 
 ### 230328
-- AllItemList 면 구현 compose 구현
+- AllItemList 화면 구현 compose 구현
 - AllItemListViewModel 구현
 - windowSoftInputMode - adjustResize 제거 : 메인 화면에서 뷰가 깨지는 현상 발생
-<
+<br>
+
+### 230329
+- ItemEdit 화면 구현
+- AllItemList 화면에서 아이템 롱클릭시 삭제 다이얼로그 보여주는 기능 추가
+- 아이템 새로 추가시 AllItemList 화면으로 이동하도록 변경
+- AllItemList에서 아이템 클릭시 ItemEdit 화면으로 이동하도록 설정 : Navigation Argument 사용
+<br>
