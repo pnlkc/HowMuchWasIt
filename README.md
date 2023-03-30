@@ -51,9 +51,7 @@
 ### 230330
 - RecentItemList 화면 compose 구현
 - RoundedCornerShape한 DatePickerDialog으로 변경
-<br>
-
-#### 발생한 문제들
+- 발생한 문제들
 1. 기존의 DatePickerDialog는 RoundedCornerShape로 변경할 수 없음
 - 해결 방법 : RoundedCornerShape한 커스텀 DatePickerDialog 컴포저블을 만들어서 사용
 2. [스택오버플로우](https://stackoverflow.com/questions/60417233/jetpack-compose-date-time-picker) 링크를 참고해서 datePickerDialog 만들었는데, CalendarView에 테마를 적용하는 코드에서 에러 발생  
