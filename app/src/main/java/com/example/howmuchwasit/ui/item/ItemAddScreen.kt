@@ -89,6 +89,7 @@ fun ItemAddBody(
     onSaveClick: () -> Unit,
     datePick: MutableState<LocalDate>,
 ) {
+    // 포커스 관리하는 포커스 매니저
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -127,6 +128,7 @@ fun ItemInputForm(
     onItemValueChanged: (ItemUiState) -> Unit,
     datePick: MutableState<LocalDate>,
 ) {
+    // 컴포저블에 포커스가 있는지 확인하는 변수
     var isFocused by remember { mutableStateOf(false) }
 
     // 포커스 관리하는 포커스 매니저
@@ -192,6 +194,7 @@ fun DatePickTextField(
     onItemValueChanged: (ItemUiState) -> Unit,
     datePick: MutableState<LocalDate>,
 ) {
+    // DatePickerDialog를 보여줘야 하는지 결정하는데 필요한 변수
     var needDatePickerDialog by rememberSaveable { mutableStateOf(false) }
 
     OutlinedTextField(

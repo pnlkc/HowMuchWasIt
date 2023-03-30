@@ -36,7 +36,7 @@ class ItemEditViewModel(
         itemUiState = newItemUiState.copy(canSave = newItemUiState.isValid())
     }
 
-
+    // 선택된 아이템의 ItemUiState 값 로드 및 datePick.value 설정
     private fun loadItemUiStateAndSetDateInfo() {
         viewModelScope.launch {
             itemUiState = itemRepository.getItemStream(itemId)

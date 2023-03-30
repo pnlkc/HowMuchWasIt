@@ -108,6 +108,7 @@ fun LazyListItem(
     onItemClick: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
+    // 항목을 삭제하는 경우 다이얼로그 보여주기 위한 변수
     var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
 
     Card(
