@@ -24,6 +24,7 @@ import com.example.howmuchwasit.ui.theme.*
 fun HomeScreen(
     navigateToAddItem: () -> Unit,
     navigateToAllItemList: () -> Unit,
+    navigateToRecentItemList: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -37,6 +38,7 @@ fun HomeScreen(
         HomeBody(
             onAddItemCardClicked = navigateToAddItem,
             onAllItemListCardClicked = navigateToAllItemList,
+            onRecentItemListCardClicked = navigateToRecentItemList,
             modifier = modifier.padding(innerPadding)
         )
     }
@@ -47,6 +49,7 @@ fun HomeScreen(
 fun HomeBody(
     onAddItemCardClicked: () -> Unit,
     onAllItemListCardClicked: () -> Unit,
+    onRecentItemListCardClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -77,7 +80,7 @@ fun HomeBody(
             HomeItemCard(
                 text = stringResource(id = R.string.recent_item),
                 modifier = modifier.weight(1f),
-                onCardClicked = {  }
+                onCardClicked = onRecentItemListCardClicked
             )
         }
 

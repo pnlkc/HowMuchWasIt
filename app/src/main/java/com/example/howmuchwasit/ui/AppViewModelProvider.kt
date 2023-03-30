@@ -9,6 +9,7 @@ import com.example.howmuchwasit.HowMuchWasItApplication
 import com.example.howmuchwasit.ui.item.AllItemListViewModel
 import com.example.howmuchwasit.ui.item.ItemAddViewModel
 import com.example.howmuchwasit.ui.item.ItemEditViewModel
+import com.example.howmuchwasit.ui.item.RecentItemListViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -27,6 +28,12 @@ object AppViewModelProvider {
         initializer {
             ItemEditViewModel(
                 this.createSavedStateHandle(),
+                howMuchWasItApplication().container.itemRepository
+            )
+        }
+
+        initializer {
+            RecentItemListViewModel(
                 howMuchWasItApplication().container.itemRepository
             )
         }

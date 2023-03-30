@@ -13,16 +13,13 @@ sealed class NavigationDestination(val route: String, val titleRes: Int) {
     object AddItem : NavigationDestination("add_item", R.string.add_item)
 
     // 최근 아이템 리스트 화면
-
+    object RecentItemList : NavigationDestination("recent_item_list", R.string.recent_item)
 
     // 전체 아이템 리스트 화면
     object AllItemList : NavigationDestination("all_item_list", R.string.all_item_list)
 
-    // 아이템 세부정보 화면
-
-
     // 아이템 수정 화면
     object EditItem : NavigationDestination(route = "edit_item", titleRes = R.string.edit_item) {
-        val itemIdArg = "itemId"
+        const val itemIdArg = "itemId"
     }
 }

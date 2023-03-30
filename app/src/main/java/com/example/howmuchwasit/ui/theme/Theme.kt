@@ -27,7 +27,8 @@ private val LightColorPalette = lightColors(
 @Composable
 fun HowMuchWasItTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
-        DarkColorPalette
+        // 다크 모드 추가 필요
+        LightColorPalette
     } else {
         LightColorPalette
     }

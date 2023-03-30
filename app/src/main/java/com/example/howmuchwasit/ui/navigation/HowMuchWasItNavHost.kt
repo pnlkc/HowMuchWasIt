@@ -9,6 +9,7 @@ import com.example.howmuchwasit.ui.home.HomeScreen
 import com.example.howmuchwasit.ui.item.AllItemListScreen
 import com.example.howmuchwasit.ui.item.ItemAddScreen
 import com.example.howmuchwasit.ui.item.ItemEditScreen
+import com.example.howmuchwasit.ui.item.RecentItemListScreen
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.*
 
 // 앱의 NavHost를 따로 분리하여 관리
@@ -27,6 +28,7 @@ fun HowMuchWasItNavHost(
             HomeScreen(
                 navigateToAddItem = { navController.navigate(AddItem.route) },
                 navigateToAllItemList = { navController.navigate(AllItemList.route) },
+                navigateToRecentItemList = { navController.navigate(RecentItemList.route) },
             )
         }
 
@@ -52,6 +54,15 @@ fun HowMuchWasItNavHost(
             )
         }
 
+        // 최근 아이템 리스트 화면
+        composable(route = RecentItemList.route) {
+            RecentItemListScreen(
+                navigateToHome = { navController.popBackStack() },
+                navigateToItemEdit = { navController.navigate(route = "${EditItem.route}/${it}") }
+            )
+        }
+
+        // 아이템 수정 화면
         composable(
             // {${EditItem.itemIdArg}} 는 매개변수 자리표시자로
             // {itemId}는 argument로 들어오는 값과 매치됩니다.

@@ -1,7 +1,9 @@
 package com.example.howmuchwasit.ui.item
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,30 +14,27 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialStyledDatePickerDialog
 import kotlinx.coroutines.launch
 
 // 아이템 추가 화면 컴포저블
@@ -180,12 +179,13 @@ fun DatePickTextField(
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
 ) {
-    // Calender 인스턴스 생성
     val calendar = Calendar.getInstance()
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _, year, month, day ->
+            Log.d("로그", " - DatePickTextField() 호출됨")
+            // month 값은 0-11 사이 값
             onItemValueChanged(itemUiState.copy(date = "$year / ${month + 1} / $day"))
         },
         calendar.get(Calendar.YEAR),
@@ -226,6 +226,8 @@ fun DatePickTextField(
             // 클릭 했을 때 리플도 모양에 맞춰 나오게 하려면 clip(Shapes.medium) 필요
             .clip(Shapes.medium)
             .clickable {
+                val (y, m, d) = itemUiState.date.split(" / ").map { it.toInt() }
+                datePickerDialog.updateDate(y, m - 1, d)
                 datePickerDialog.show()
             }
     )
