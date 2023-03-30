@@ -35,7 +35,7 @@
 <br>
 
 ### 230328
-- AllItemList 화면 구현 compose 구현
+- AllItemList 화면 compose 구현
 - AllItemListViewModel 구현
 - windowSoftInputMode - adjustResize 제거 : 메인 화면에서 뷰가 깨지는 현상 발생
 <br>
@@ -46,4 +46,16 @@
 - 아이템 새로 추가시 AllItemList 화면으로 이동하도록 변경
 - AllItemList에서 아이템 클릭시 ItemEdit 화면으로 이동하도록 설정 : Navigation Argument 사용
 - 아이템 삭제 시 애니메이션 추가 : items의 lazy item scope 안에서 modifier.animateItemPlacement() 설정
+<br>
+
+### 230330
+- RecentItemList 화면 compose 구현
+- RoundedCornerShape한 DatePickerDialog으로 변경
+<br>
+
+#### 발생한 문제들
+1. 기존의 DatePickerDialog는 RoundedCornerShape로 변경할 수 없음
+- 해결 방법 : RoundedCornerShape한 커스텀 DatePickerDialog 컴포저블을 만들어서 사용
+2. [스택오버플로우](https://stackoverflow.com/questions/60417233/jetpack-compose-date-time-picker) 링크를 참고해서 datePickerDialog 만들었는데, CalendarView에 테마를 적용하는 코드에서 에러 발생  
+- 해결 방법 : themes.xml 파일에서 `parent="ThemeOverlay.MaterialComponents.MaterialCalendar"`이 아니라 `parent="@android:style/Widget.CalendarView"`로 설정하고, `<item name="colorAccent"><day selection color></item>`가 아니라 `<item name="android:colorAccent"><day selection color></item>`로 설정하면 됨  
 <br>
