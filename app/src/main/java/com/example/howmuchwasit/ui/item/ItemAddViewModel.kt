@@ -2,7 +2,6 @@ package com.example.howmuchwasit.ui.item
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.howmuchwasit.data.ItemRepository
@@ -15,6 +14,9 @@ class ItemAddViewModel(
     // private set으로 외부에서는 수정 불가능하게 설정
     var itemUiState by mutableStateOf(ItemUiState())
         private set
+
+    // 날짜 선택 다이얼로그 결과 저장용 변수
+    val datePick = mutableStateOf(LocalDate.now())
 
     init {
         initItemUiState()

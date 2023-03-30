@@ -39,7 +39,8 @@ fun ItemEditScreen(
                     viewModel.updateItem()
                     navigateBack()
                 }
-            }
+            },
+            datePick = viewModel.datePick
         )
     }
 }

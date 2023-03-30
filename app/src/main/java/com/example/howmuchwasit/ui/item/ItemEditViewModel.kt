@@ -11,6 +11,8 @@ import com.example.howmuchwasit.data.toItemUiState
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.EditItem
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -22,8 +24,11 @@ class ItemEditViewModel(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
+    // 날짜 선택 다이얼로그 결과 저장용 변수
+    val datePick = mutableStateOf(LocalDate.now())
+
     init {
-        loadItemUiState()
+        loadItemUiStateAndSetDateInfo()
     }
 
     // itemUiState 값 업데이트
@@ -32,12 +37,17 @@ class ItemEditViewModel(
     }
 
 
-    private fun loadItemUiState() {
+    private fun loadItemUiStateAndSetDateInfo() {
         viewModelScope.launch {
             itemUiState = itemRepository.getItemStream(itemId)
                 .filterNotNull()
                 .first()
                 .toItemUiState(canSave = true)
+
+            datePick.value = LocalDate.parse(
+                itemUiState.date,
+                DateTimeFormatter.ofPattern("yyyy / M / d")
+            )
         }
     }
 

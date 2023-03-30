@@ -1,19 +1,21 @@
 package com.example.howmuchwasit.ui.item
 
-import android.annotation.SuppressLint
-import android.app.DatePickerDialog
-import android.icu.util.Calendar
-import android.util.Log
+import android.view.ContextThemeWrapper
+import android.widget.CalendarView
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -26,16 +28,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.datepicker.MaterialStyledDatePickerDialog
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 // 아이템 추가 화면 컴포저블
 @Composable
@@ -66,7 +73,8 @@ fun ItemAddScreen(
                     viewModel.saveItem()
                     navigateToAllItemList()
                 }
-            }
+            },
+            datePick = viewModel.datePick
         )
     }
 }
@@ -79,6 +87,7 @@ fun ItemAddBody(
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
     onSaveClick: () -> Unit,
+    datePick: MutableState<LocalDate>,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -96,7 +105,8 @@ fun ItemAddBody(
         ItemInputForm(
             navigateBack = navigateBack,
             itemUiState = itemUiState,
-            onItemValueChanged = onItemValueChanged
+            onItemValueChanged = onItemValueChanged,
+            datePick = datePick
         )
 
         Spacer(modifier = modifier.weight(1f))
@@ -115,6 +125,7 @@ fun ItemInputForm(
     navigateBack: () -> Unit,
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
+    datePick: MutableState<LocalDate>,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -134,7 +145,8 @@ fun ItemInputForm(
     ) {
         DatePickTextField(
             itemUiState = itemUiState,
-            onItemValueChanged = onItemValueChanged
+            onItemValueChanged = onItemValueChanged,
+            datePick = datePick
         )
 
         ItemAddTextField(
@@ -178,20 +190,9 @@ fun DatePickTextField(
     modifier: Modifier = Modifier,
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
+    datePick: MutableState<LocalDate>,
 ) {
-    val calendar = Calendar.getInstance()
-
-    val datePickerDialog = DatePickerDialog(
-        LocalContext.current,
-        { _, year, month, day ->
-            Log.d("로그", " - DatePickTextField() 호출됨")
-            // month 값은 0-11 사이 값
-            onItemValueChanged(itemUiState.copy(date = "$year / ${month + 1} / $day"))
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
+    var needDatePickerDialog by rememberSaveable { mutableStateOf(false) }
 
     OutlinedTextField(
         value = itemUiState.date,
@@ -225,12 +226,20 @@ fun DatePickTextField(
             .fillMaxWidth()
             // 클릭 했을 때 리플도 모양에 맞춰 나오게 하려면 clip(Shapes.medium) 필요
             .clip(Shapes.medium)
-            .clickable {
-                val (y, m, d) = itemUiState.date.split(" / ").map { it.toInt() }
-                datePickerDialog.updateDate(y, m - 1, d)
-                datePickerDialog.show()
-            }
+            .clickable { needDatePickerDialog = true }
     )
+
+    if (needDatePickerDialog) {
+        DatePicker(
+            itemUiState = itemUiState,
+            onDateSelected = {
+                val date = it.format(DateTimeFormatter.ofPattern("yyyy / M / d"))
+                onItemValueChanged(itemUiState.copy(date = date))
+            },
+            onDismissRequest = { needDatePickerDialog = false },
+            datePick = datePick
+        )
+    }
 }
 
 // 아이템 정보 입력 컴포저블
@@ -345,3 +354,143 @@ fun ItemAddButton(
         )
     }
 }
+
+// 날짜 선택 다이얼로그
+@Composable
+fun DatePicker(
+    itemUiState: ItemUiState,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismissRequest: () -> Unit,
+    datePick: MutableState<LocalDate>,
+) {
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties = DialogProperties()
+    ) {
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+                .background(
+                    color = White,
+                    shape = Shapes.medium
+                )
+        ) {
+            Column(
+                Modifier
+                    .defaultMinSize(minHeight = 72.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = Portage,
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
+                    .padding(24.dp)
+            ) {
+                val date = LocalDate.parse(
+                    itemUiState.date,
+                    DateTimeFormatter.ofPattern("yyyy / M / d")
+                )
+
+                Text(
+                    text = date.format(DateTimeFormatter.ofPattern("yyyy년")),
+                    style = MaterialTheme.typography.h6,
+                    color = LightGray
+                )
+
+                Text(
+                    text = date.format(DateTimeFormatter.ofPattern("M월 d일 (E)")),
+                    style = MaterialTheme.typography.h4,
+                    color = White
+                )
+            }
+
+            CustomCalendarView(
+                itemUiState = itemUiState,
+                onItemValueChanged = { datePick.value = it }
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(bottom = 16.dp, end = 16.dp)
+            ) {
+                TextButton(
+                    onClick = onDismissRequest
+                ) {
+                    Text(
+                        text = "취소",
+                        style = MaterialTheme.typography.button,
+                        color = Portage
+                    )
+                }
+
+                TextButton(
+                    onClick = {
+                        onDateSelected(datePick.value)
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(
+                        text = "확인",
+                        style = MaterialTheme.typography.button,
+                        color = Portage
+                    )
+                }
+
+            }
+        }
+    }
+}
+
+// 날짜 선택 다이얼로그 안에 들어가는 CalendarView
+@Composable
+fun CustomCalendarView(
+    itemUiState: ItemUiState,
+    modifier: Modifier = Modifier,
+    onItemValueChanged: (LocalDate) -> Unit,
+) {
+    AndroidView(
+        modifier = modifier.wrapContentSize(),
+        factory = { context ->
+            CalendarView(ContextThemeWrapper(context, R.style.CustomCalendarTheme))
+        },
+        update = { view ->
+            // String을 LocalDate로 변환
+            val date =
+                LocalDate.parse(itemUiState.date, DateTimeFormatter.ofPattern("yyyy / M / d"))
+            // date의 자정 날짜의 instant 객체 생성
+            val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            // instant 객체를 밀리초 단위의 Long 값으로 변환
+            val timeInMillis = instant.toEpochMilli()
+
+            // CalendarView 시작 값을 itemUiState.date이 변환값으로 설정
+            view.date = timeInMillis
+
+            view.setOnDateChangeListener { _, year, month, day ->
+                onItemValueChanged(
+                    LocalDate
+                        .now()
+                        .withYear(year)
+                        .withMonth(month + 1)
+                        .withDayOfMonth(day)
+                )
+            }
+
+        }
+    )
+}
+
+@Preview(showBackground = false)
+@Composable
+fun CustomCalendarViewPreView() {
+    HowMuchWasItTheme {
+        DatePicker(
+            itemUiState = ItemUiState(),
+            onDateSelected = { },
+            onDismissRequest = { },
+            datePick = remember { mutableStateOf(LocalDate.now()) }
+        )
+    }
+}
+
