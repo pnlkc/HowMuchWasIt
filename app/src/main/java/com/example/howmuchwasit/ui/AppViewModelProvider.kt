@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.howmuchwasit.HowMuchWasItApplication
+import com.example.howmuchwasit.ui.home.HomeScreenViewModel
 import com.example.howmuchwasit.ui.item.AllItemListViewModel
 import com.example.howmuchwasit.ui.item.ItemAddViewModel
 import com.example.howmuchwasit.ui.item.ItemEditViewModel
@@ -34,6 +35,12 @@ object AppViewModelProvider {
 
         initializer {
             RecentItemListViewModel(
+                howMuchWasItApplication().container.itemRepository
+            )
+        }
+
+        initializer {
+            HomeScreenViewModel(
                 howMuchWasItApplication().container.itemRepository
             )
         }

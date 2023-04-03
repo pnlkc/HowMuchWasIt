@@ -16,4 +16,5 @@
     <string name="no">아니오</string>
     <string name="add">추가</string>
     <string name="recent_item">최근 항목</string>
+    <string name="no_search_result">검색 결과가 없습니다</string>
 </resources>

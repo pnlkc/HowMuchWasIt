@@ -22,4 +22,8 @@ interface ItemDao {
 
     @Query("SELECT * FROM products WHERE REPLACE(date, ' / ', '-') > DATE('now', '-3 months') ORDER BY date DESC, name ASC")
     fun getRecentItem(): Flow<List<Item>>
+
+    // 바인딩 변수의 앞뒤에 || 연산자를 통해 '%' 붙여주어야 됨
+    @Query("SELECT * FROM products WHERE name LIKE '%' || :searchTerm || '%' ORDER BY name ASC")
+    fun getSearchItem(searchTerm: String) : Flow<List<Item>>
 }

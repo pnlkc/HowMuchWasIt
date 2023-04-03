@@ -14,4 +14,6 @@ interface ItemRepository {
     fun getItemStream(id: Int): Flow<Item>
 
     fun getRecentItemStream(): Flow<List<Item>>
+
+    fun getSearchItemStream(searchTerm: String): Flow<List<Item>>
 }
