@@ -57,3 +57,10 @@
 2. [스택오버플로우](https://stackoverflow.com/questions/60417233/jetpack-compose-date-time-picker) 링크를 참고해서 datePickerDialog 만들었는데, CalendarView에 테마를 적용하는 코드에서 에러 발생  
 - 해결 방법 : themes.xml 파일에서 `parent="ThemeOverlay.MaterialComponents.MaterialCalendar"`이 아니라 `parent="@android:style/Widget.CalendarView"`로 설정하고, `<item name="colorAccent"><day selection color></item>`가 아니라 `<item name="android:colorAccent"><day selection color></item>`로 설정하면 됨  
 <br>
+
+### 230403
+- 홈화면 검색 기능 추가 : flow - debounce 기능으로 구현
+- 전체 목록에서 아이템들의 이름만 보이는 리스트로 변경, 전체 목록의 아이템을 클릭하면 아이템들의 구매 내역들이 보이도록 변경
+- 홈화면 뒤로가기 토스트 메세지 기능 구현
+- windowSoftInputMode - adjustResize 추가 : 메인 화면에서 뷰가 깨지는 현상 해결
+<br>
