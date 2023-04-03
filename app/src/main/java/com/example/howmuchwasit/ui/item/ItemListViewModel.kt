@@ -1,24 +1,24 @@
 package com.example.howmuchwasit.ui.item
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.howmuchwasit.HowMuchWasItApplication
-import com.example.howmuchwasit.data.AppContainer
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.data.ItemRepository
+import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class AllItemListViewModel(
+class ItemListViewModel(
+    savedStateHandle: SavedStateHandle,
     private val itemRepository: ItemRepository
 ) : ViewModel() {
-    // private set으로 외부에서는 수정 불가능하게 설정
-    val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getAllItemsStream()
+    val name: String = checkNotNull(savedStateHandle[NavigationDestination.ItemList.nameArg])
+
+    val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getItemsListStream(name)
         .map { ItemListUiState(it) }
         .stateIn(
             scope = viewModelScope,

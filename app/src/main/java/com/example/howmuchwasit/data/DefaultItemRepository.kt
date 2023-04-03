@@ -9,12 +9,14 @@ class DefaultItemRepository(private val itemDao: ItemDao) : ItemRepository {
 
     override suspend fun updateItem(item: Item) = itemDao.update(item = item)
 
-    override fun getAllItemsStream(): Flow<List<Item>> = itemDao.getAllItems()
+    override fun getAllItemsNameStream(): Flow<List<String>> = itemDao.getAllItemsName()
+
+    override fun getItemsListStream(name: String): Flow<List<Item>> = itemDao.getItemsList(name)
 
     override fun getItemStream(id: Int): Flow<Item> = itemDao.getItem(id)
 
     override fun getRecentItemStream(): Flow<List<Item>> = itemDao.getRecentItem()
 
-    override fun getSearchItemStream(searchTerm: String): Flow<List<Item>> =
+    override fun getSearchItemStream(searchTerm: String): Flow<List<String>> =
         itemDao.getSearchItem(searchTerm)
 }

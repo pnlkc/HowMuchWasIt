@@ -32,7 +32,7 @@ fun RecentItemListScreen(
             navigateUp = navigateToHome
         )
     }) { innerPadding ->
-        AllItemListBody(
+        ItemListBody(
             modifier = modifier.padding(innerPadding),
             itemList = itemListUiState.itemList,
             onItemClick = navigateToItemEdit,

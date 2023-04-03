@@ -6,10 +6,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.howmuchwasit.ui.home.HomeScreen
-import com.example.howmuchwasit.ui.item.AllItemListScreen
-import com.example.howmuchwasit.ui.item.ItemAddScreen
-import com.example.howmuchwasit.ui.item.ItemEditScreen
-import com.example.howmuchwasit.ui.item.RecentItemListScreen
+import com.example.howmuchwasit.ui.item.*
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.*
 
 // 앱의 NavHost를 따로 분리하여 관리
@@ -27,7 +24,7 @@ fun HowMuchWasItNavHost(
         composable(route = Home.route) {
             HomeScreen(
                 navigateToAddItem = { navController.navigate(AddItem.route) },
-                navigateToAllItemList = { navController.navigate(AllItemList.route) },
+                navigateToAllItemList = { navController.navigate(AllItemNameList.route) },
                 navigateToRecentItemList = { navController.navigate(RecentItemList.route) },
             )
         }
@@ -39,16 +36,27 @@ fun HowMuchWasItNavHost(
                 onNavigateUp = { navController.navigateUp() },
                 navigateToAllItemList = {
                     navController.navigate(
-                        route = AllItemList.route,
+                        route = AllItemNameList.route,
                         navOptions = NavOptions.Builder().setPopUpTo(Home.route, false).build()
                     )
                 }
             )
         }
 
-        // 전체 아이템 리스트 화면
-        composable(route = AllItemList.route) {
-            AllItemListScreen(
+        // 전체 아이템 이름 리스트 화면
+        composable(route = AllItemNameList.route) {
+            AllItemNameListScreen(
+                navigateToHome = { navController.popBackStack() },
+                navigateToItemList = { navController.navigate(route = "${ItemList.route}/${it}") },
+            )
+        }
+
+        // 특정 아이템 리스트 화면
+        composable(
+            route = "${ItemList.route}/{${ItemList.nameArg}}",
+            arguments = listOf(navArgument(ItemList.nameArg) { type = NavType.StringType })
+        ) {
+            ItemListScreen(
                 navigateToHome = { navController.popBackStack() },
                 navigateToItemEdit = { navController.navigate(route = "${EditItem.route}/${it}") },
             )

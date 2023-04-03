@@ -4,12 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.ui.item.ItemListUiState
+import com.example.howmuchwasit.ui.item.ItemNameListUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
 class HomeScreenViewModel(
-    val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
 ) : ViewModel() {
     val searchTerm = MutableStateFlow("")
 
@@ -18,14 +19,14 @@ class HomeScreenViewModel(
         .debounce(350)
         .distinctUntilChanged()
         .flatMapLatest {
-            itemRepository.getSearchItemStream(it)
-                .map { listItem -> ItemListUiState(listItem) }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                    initialValue = ItemListUiState()
-                )
+            itemRepository.getSearchItemStream(searchTerm.value)
+                .map { listItem -> ItemNameListUiState(listItem) }
         }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemNameListUiState()
+        )
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

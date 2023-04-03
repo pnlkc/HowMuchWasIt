@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
@@ -27,14 +28,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
-import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.item.ItemListUiState
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.Home
 import com.example.howmuchwasit.ui.theme.*
 
@@ -77,10 +77,7 @@ fun HomeBody(
     val focusManager = LocalFocusManager.current
 
     val isSearchState = rememberSaveable { mutableStateOf(false) }
-    val searchResult = viewModel.debounceSearchTerm
-        .collectAsState(initial = ItemListUiState())
-        .value
-        .itemList
+    val searchResult = viewModel.debounceSearchTerm.collectAsState()
 
     var backWait = 0L
     val context = LocalContext.current
@@ -121,7 +118,7 @@ fun HomeBody(
                 SearchResultLazyColumn(
                     modifier = modifier
                         .weight(1f),
-                    searchResult = searchResult
+                    searchResult = searchResult.value.itemNameList
                 )
             }
             false -> {
@@ -143,7 +140,7 @@ fun HomeBody(
                 }
 
                 HomeItemCard(
-                    text = stringResource(id = R.string.all_item_list),
+                    text = stringResource(id = R.string.all_item_name_list),
                     modifier = modifier.weight(1f),
                     onCardClicked = onAllItemListCardClicked
                 )
@@ -195,6 +192,8 @@ fun HomeSearchBar(
                 focusedBorderColor = MediumSlateBlue,
                 textColor = Black
             ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             modifier = modifier
                 .fillMaxWidth()
         )
@@ -232,7 +231,7 @@ fun HomeItemCard(
 @Composable
 fun SearchResultLazyColumn(
     modifier: Modifier = Modifier,
-    searchResult: List<Item>,
+    searchResult: List<String>,
 ) {
     LazyColumn(
         modifier = modifier
@@ -254,7 +253,7 @@ fun SearchResultLazyColumn(
 
 @Composable
 fun SearchResultItem(
-    item: Item,
+    item: String,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -275,7 +274,7 @@ fun SearchResultItem(
 
 
         Text(
-            text = item.name,
+            text = item,
             style = Typography.h3,
             modifier = Modifier.weight(1f)
         )

@@ -13,8 +13,11 @@ data class ItemUiState(
     val canSave: Boolean = false
 )
 
-// 아이템 상태 리스트 데이터 클래스
+// 아이템 리스트 상태 데이터 클래스
 data class ItemListUiState(val itemList: List<Item> = listOf())
+
+// 아이템 이름 목록 상태 데이터 클래스
+data class ItemNameListUiState(val itemNameList: List<String> = listOf())
 
 
 // ItemUiState를 Room Entity 클래스로 변경

@@ -7,10 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.howmuchwasit.HowMuchWasItApplication
 import com.example.howmuchwasit.ui.home.HomeScreenViewModel
-import com.example.howmuchwasit.ui.item.AllItemListViewModel
-import com.example.howmuchwasit.ui.item.ItemAddViewModel
-import com.example.howmuchwasit.ui.item.ItemEditViewModel
-import com.example.howmuchwasit.ui.item.RecentItemListViewModel
+import com.example.howmuchwasit.ui.item.*
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -21,7 +18,8 @@ object AppViewModelProvider {
         }
 
         initializer {
-            AllItemListViewModel(
+            ItemListViewModel(
+                this.createSavedStateHandle(),
                 howMuchWasItApplication().container.itemRepository
             )
         }
@@ -41,6 +39,12 @@ object AppViewModelProvider {
 
         initializer {
             HomeScreenViewModel(
+                howMuchWasItApplication().container.itemRepository
+            )
+        }
+
+        initializer {
+            AllItemNameListViewModel(
                 howMuchWasItApplication().container.itemRepository
             )
         }

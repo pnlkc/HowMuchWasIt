@@ -1,13 +1,11 @@
 package com.example.howmuchwasit.ui.item
 
-import android.graphics.drawable.shapes.Shape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,24 +28,24 @@ import com.example.howmuchwasit.ui.theme.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun AllItemListScreen(
+fun ItemListScreen(
     modifier: Modifier = Modifier,
     navigateToHome: () -> Unit,
     navigateToItemEdit: (Int) -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: AllItemListViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ItemListViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val itemListUiState by viewModel.itemListUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
         HowMuchWasItTopAppBar(
-            title = stringResource(id = NavigationDestination.AllItemList.titleRes),
+            title = viewModel.name,
             canNavigateBack = canNavigateBack,
             navigateUp = navigateToHome
         )
     }) { innerPadding ->
-        AllItemListBody(
+        ItemListBody(
             modifier = modifier.padding(innerPadding),
             itemList = itemListUiState.itemList,
             onItemClick = navigateToItemEdit,
@@ -61,13 +59,13 @@ fun AllItemListScreen(
 }
 
 @Composable
-fun AllItemListBody(
+fun ItemListBody(
     modifier: Modifier = Modifier,
     itemList: List<Item>,
     onItemClick: (Int) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
-    AllItemLazyList(
+    ItemListLazyColumn(
         itemList = itemList,
         onItemClick = { onItemClick(it.id) },
         modifier = modifier,
@@ -77,7 +75,7 @@ fun AllItemListBody(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AllItemLazyList(
+fun ItemListLazyColumn(
     modifier: Modifier = Modifier,
     itemList: List<Item>,
     onItemClick: (Item) -> Unit,
@@ -90,7 +88,7 @@ fun AllItemLazyList(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         items(items = itemList, key = { it.id }) { item ->
-            LazyListItem(
+            ItemListLazyColumnItem(
                 modifier = modifier.animateItemPlacement(),
                 item = item,
                 onItemClick = onItemClick,
@@ -102,7 +100,7 @@ fun AllItemLazyList(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LazyListItem(
+fun ItemListLazyColumnItem(
     modifier: Modifier = Modifier,
     item: Item,
     onItemClick: (Item) -> Unit,
