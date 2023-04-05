@@ -1,4 +1,4 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.data.toItemUiState
+import com.example.howmuchwasit.ui.item.ItemUiState
+import com.example.howmuchwasit.ui.item.isValid
+import com.example.howmuchwasit.ui.item.toItem
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.EditItem
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

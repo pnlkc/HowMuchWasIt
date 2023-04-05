@@ -1,4 +1,4 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.screen
 
 import android.view.ContextThemeWrapper
 import android.widget.CalendarView
@@ -37,6 +37,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
+import com.example.howmuchwasit.ui.item.ItemUiState
+import com.example.howmuchwasit.ui.item.isPriceDigitsOnly
+import com.example.howmuchwasit.ui.item.isQuantityDigitsOnly
+import com.example.howmuchwasit.ui.item.isValid
+import com.example.howmuchwasit.ui.item.viewmodel.ItemAddViewModel
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
 import kotlinx.coroutines.launch

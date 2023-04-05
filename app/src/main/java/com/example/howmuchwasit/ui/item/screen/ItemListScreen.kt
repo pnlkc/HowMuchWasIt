@@ -1,5 +1,6 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -23,7 +24,10 @@ import com.example.howmuchwasit.R
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.navigation.NavigationDestination
+import com.example.howmuchwasit.ui.item.ItemUiState
+import com.example.howmuchwasit.ui.item.isValid
+import com.example.howmuchwasit.ui.item.oneProductPrice
+import com.example.howmuchwasit.ui.item.viewmodel.ItemListViewModel
 import com.example.howmuchwasit.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -36,6 +40,7 @@ fun ItemListScreen(
     viewModel: ItemListViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val itemListUiState by viewModel.itemListUiState.collectAsState()
+    val itemUiState by viewModel.itemUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
@@ -47,6 +52,7 @@ fun ItemListScreen(
     }) { innerPadding ->
         ItemListBody(
             modifier = modifier.padding(innerPadding),
+            lowestItem = itemUiState,
             itemList = itemListUiState.itemList,
             onItemClick = navigateToItemEdit,
             onItemLongClick = {
@@ -61,11 +67,13 @@ fun ItemListScreen(
 @Composable
 fun ItemListBody(
     modifier: Modifier = Modifier,
+    lowestItem: ItemUiState?,
     itemList: List<Item>,
     onItemClick: (Int) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
     ItemListLazyColumn(
+        lowestItem = lowestItem,
         itemList = itemList,
         onItemClick = { onItemClick(it.id) },
         modifier = modifier,
@@ -77,6 +85,7 @@ fun ItemListBody(
 @Composable
 fun ItemListLazyColumn(
     modifier: Modifier = Modifier,
+    lowestItem: ItemUiState?,
     itemList: List<Item>,
     onItemClick: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
@@ -87,6 +96,14 @@ fun ItemListLazyColumn(
             .padding(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
+        if (lowestItem != null && lowestItem.isValid()) {
+            item {
+                LowestItem(
+                    item = lowestItem
+                )
+            }
+        }
+
         items(items = itemList, key = { it.id }) { item ->
             ItemListLazyColumnItem(
                 modifier = modifier.animateItemPlacement(),
@@ -94,6 +111,65 @@ fun ItemListLazyColumn(
                 onItemClick = onItemClick,
                 onItemLongClick = onItemLongClick
             )
+        }
+    }
+}
+
+@Composable
+fun LowestItem(
+    modifier: Modifier = Modifier,
+    item: ItemUiState,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        elevation = 2.dp,
+        border = BorderStroke(width = 2.dp, color = Pink)
+    ) {
+        Column(
+            modifier = modifier
+                .background(White)
+                .padding(top = 8.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = item.date,
+                style = Typography.body1,
+                color = Gray
+            )
+
+            Divider(color = Pink)
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "최저가",
+                    style = Typography.h3,
+                    fontWeight = FontWeight.Bold,
+                    color = LightRed
+                )
+
+                val priceSpannable = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
+                        append("개당 ")
+                    }
+                    append(item.oneProductPrice().toString())
+                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
+                        append(" 원")
+                    }
+                }
+
+                Text(
+                    text = priceSpannable,
+                    style = Typography.h3,
+                    color = Black
+                )
+            }
         }
     }
 }

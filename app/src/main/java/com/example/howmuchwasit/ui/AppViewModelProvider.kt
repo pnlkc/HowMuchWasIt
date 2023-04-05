@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.howmuchwasit.HowMuchWasItApplication
 import com.example.howmuchwasit.ui.home.HomeScreenViewModel
-import com.example.howmuchwasit.ui.item.*
+import com.example.howmuchwasit.ui.item.viewmodel.*
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {

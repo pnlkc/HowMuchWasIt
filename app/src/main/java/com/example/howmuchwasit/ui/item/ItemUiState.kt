@@ -27,10 +27,10 @@ fun ItemUiState.toItem() = Item(
     name = name,
     price = price.toInt(),
     quantity = quantity.toInt(),
-    onePrice = onProductPrice(),
+    onePrice = oneProductPrice(),
 )
 
-fun ItemUiState.onProductPrice() = price.toInt() / quantity.toInt()
+fun ItemUiState.oneProductPrice() = price.toInt() / quantity.toInt()
 
 
 fun ItemUiState.isPriceDigitsOnly() = price.isDigitsOnly()

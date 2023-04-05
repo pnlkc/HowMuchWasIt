@@ -1,46 +1,48 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.screen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
+import com.example.howmuchwasit.ui.item.screen.ItemAddBody
+import com.example.howmuchwasit.ui.item.viewmodel.ItemEditViewModel
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 
 @Composable
-fun RecentItemListScreen(
+fun ItemEditScreen(
     modifier: Modifier = Modifier,
-    navigateToHome: () -> Unit,
-    navigateToItemEdit: (Int) -> Unit,
+    navigateBack: () -> Unit,
+    onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: RecentItemListViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ItemEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val itemListUiState by viewModel.itemListUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
         HowMuchWasItTopAppBar(
-            title = stringResource(id = NavigationDestination.RecentItemList.titleRes),
+            title = stringResource(id = NavigationDestination.EditItem.titleRes),
             canNavigateBack = canNavigateBack,
-            navigateUp = navigateToHome
+            navigateUp = onNavigateUp
         )
     }) { innerPadding ->
-        ItemListBody(
+        ItemAddBody(
             modifier = modifier.padding(innerPadding),
-            itemList = itemListUiState.itemList,
-            onItemClick = navigateToItemEdit,
-            onItemLongClick = {
+            navigateBack = navigateBack,
+            itemUiState = viewModel.itemUiState,
+            onItemValueChanged = viewModel::updateItemUiState,
+            onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.deleteItem(it)
+                    viewModel.updateItem()
+                    navigateBack()
                 }
-            }
+            },
+            datePick = viewModel.datePick
         )
     }
 }

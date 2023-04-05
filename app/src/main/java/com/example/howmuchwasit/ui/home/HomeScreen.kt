@@ -44,6 +44,7 @@ fun HomeScreen(
     navigateToAddItem: () -> Unit,
     navigateToAllItemList: () -> Unit,
     navigateToRecentItemList: () -> Unit,
+    navigateToItemList: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -59,6 +60,7 @@ fun HomeScreen(
             onAddItemCardClicked = navigateToAddItem,
             onAllItemListCardClicked = navigateToAllItemList,
             onRecentItemListCardClicked = navigateToRecentItemList,
+            onSearchItemClicked = navigateToItemList,
             modifier = modifier.padding(innerPadding),
             viewModel = viewModel
         )
@@ -71,6 +73,7 @@ fun HomeBody(
     onAddItemCardClicked: () -> Unit,
     onAllItemListCardClicked: () -> Unit,
     onRecentItemListCardClicked: () -> Unit,
+    onSearchItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel,
 ) {
@@ -118,7 +121,8 @@ fun HomeBody(
                 SearchResultLazyColumn(
                     modifier = modifier
                         .weight(1f),
-                    searchResult = searchResult.value.itemNameList
+                    searchResult = searchResult.value.itemNameList,
+                    onSearchItemClicked = onSearchItemClicked,
                 )
             }
             false -> {
@@ -179,11 +183,24 @@ fun HomeSearchBar(
                 )
             },
             trailingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = Black
-                )
+                if (text.value.isNotEmpty()) {
+                    // 검색어 삭제 버튼
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_cancel_24),
+                        contentDescription = null,
+                        tint = GraySuit,
+                        modifier = Modifier
+                            .clickable {
+                                viewModel.searchTerm.value = ""
+                            }
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = null,
+                        tint = Black
+                    )
+                }
             },
             shape = Shapes.medium,
             textStyle = Typography.h3,
@@ -232,12 +249,15 @@ fun HomeItemCard(
 fun SearchResultLazyColumn(
     modifier: Modifier = Modifier,
     searchResult: List<String>,
+    onSearchItemClicked: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp),
-        verticalArrangement = if (searchResult.isEmpty()) Arrangement.Center else Arrangement.spacedBy(24.dp)
+        verticalArrangement = if (searchResult.isEmpty()) Arrangement.Center else Arrangement.spacedBy(
+            24.dp
+        )
     ) {
         if (searchResult.isEmpty()) {
             item {
@@ -245,7 +265,10 @@ fun SearchResultLazyColumn(
             }
         } else {
             items(searchResult) { item ->
-                SearchResultItem(item = item)
+                SearchResultItem(
+                    item = item,
+                    onSearchItemClicked = onSearchItemClicked
+                )
             }
         }
     }
@@ -254,9 +277,12 @@ fun SearchResultLazyColumn(
 @Composable
 fun SearchResultItem(
     item: String,
+    onSearchItemClicked: (String) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSearchItemClicked(item) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.howmuchwasit.ui.home.HomeScreen
 import com.example.howmuchwasit.ui.item.*
+import com.example.howmuchwasit.ui.item.screen.*
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.*
 
 // 앱의 NavHost를 따로 분리하여 관리
@@ -26,6 +27,7 @@ fun HowMuchWasItNavHost(
                 navigateToAddItem = { navController.navigate(AddItem.route) },
                 navigateToAllItemList = { navController.navigate(AllItemNameList.route) },
                 navigateToRecentItemList = { navController.navigate(RecentItemList.route) },
+                navigateToItemList = { navController.navigate(route = "${ItemList.route}/${it}") }
             )
         }
 

@@ -1,24 +1,20 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.data.ItemRepository
-import com.example.howmuchwasit.ui.navigation.NavigationDestination
+import com.example.howmuchwasit.ui.item.ItemListUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class ItemListViewModel(
-    savedStateHandle: SavedStateHandle,
+class RecentItemListViewModel(
     private val itemRepository: ItemRepository
 ) : ViewModel() {
-    val name: String = checkNotNull(savedStateHandle[NavigationDestination.ItemList.nameArg])
-
-    val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getItemsListStream(name)
+    // private set으로 외부에서는 수정 불가능하게 설정
+    val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getRecentItemStream()
         .map { ItemListUiState(it) }
         .stateIn(
             scope = viewModelScope,

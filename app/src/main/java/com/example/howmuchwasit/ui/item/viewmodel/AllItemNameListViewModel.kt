@@ -1,24 +1,24 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.data.ItemRepository
+import com.example.howmuchwasit.ui.item.ItemNameListUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class RecentItemListViewModel(
+class AllItemNameListViewModel(
     private val itemRepository: ItemRepository
 ) : ViewModel() {
-    // private set으로 외부에서는 수정 불가능하게 설정
-    val itemListUiState: StateFlow<ItemListUiState> = itemRepository.getRecentItemStream()
-        .map { ItemListUiState(it) }
+    val itemNameListUiState: StateFlow<ItemNameListUiState> = itemRepository.getAllItemsNameStream()
+        .map { ItemNameListUiState(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = ItemListUiState()
+            initialValue = ItemNameListUiState()
         )
 
     companion object {

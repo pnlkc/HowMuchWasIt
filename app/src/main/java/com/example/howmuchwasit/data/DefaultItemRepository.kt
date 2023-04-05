@@ -13,6 +13,8 @@ class DefaultItemRepository(private val itemDao: ItemDao) : ItemRepository {
 
     override fun getItemsListStream(name: String): Flow<List<Item>> = itemDao.getItemsList(name)
 
+    override fun getLowestItemStream(name: String): Flow<Item> = itemDao.getLowestItem(name)
+
     override fun getItemStream(id: Int): Flow<Item> = itemDao.getItem(id)
 
     override fun getRecentItemStream(): Flow<List<Item>> = itemDao.getRecentItem()

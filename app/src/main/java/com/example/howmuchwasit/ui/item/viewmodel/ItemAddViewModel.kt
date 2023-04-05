@@ -1,10 +1,13 @@
-package com.example.howmuchwasit.ui.item
+package com.example.howmuchwasit.ui.item.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.howmuchwasit.data.ItemRepository
+import com.example.howmuchwasit.ui.item.ItemUiState
+import com.example.howmuchwasit.ui.item.isValid
+import com.example.howmuchwasit.ui.item.toItem
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
