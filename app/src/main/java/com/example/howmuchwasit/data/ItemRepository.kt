@@ -14,7 +14,7 @@ interface ItemRepository {
 
     fun getItemsListStream(name: String): Flow<List<Item>>
 
-    fun getLowestItemStream(name: String): Flow<Item>
+    fun getLowestItemStream(name: String): Flow<Item?>
 
     fun getItemStream(id: Int): Flow<Item>
 

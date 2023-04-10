@@ -20,8 +20,8 @@ interface ItemDao {
     @Query("SELECT * FROM products WHERE name = :name")
     fun getItemsList(name: String): Flow<List<Item>>
 
-    @Query("SELECT * FROM products WHERE name = :name ORDER BY onePrice LIMIT 1")
-    fun getLowestItem(name: String): Flow<Item>
+    @Query("SELECT * FROM products WHERE name = :name ORDER BY onePrice ASC LIMIT 1")
+    fun getLowestItem(name: String): Flow<Item?>
 
     @Query("SELECT name FROM products GROUP BY name")
     fun getAllItemsName(): Flow<List<String>>

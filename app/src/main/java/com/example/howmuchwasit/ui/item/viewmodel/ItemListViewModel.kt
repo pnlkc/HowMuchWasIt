@@ -32,7 +32,7 @@ class ItemListViewModel @Inject constructor(
         )
 
     val itemUiState: StateFlow<ItemUiState> = itemRepository.getLowestItemStream(name)
-        .map { it.toItemUiState(false) }
+        .map { it?.toItemUiState(false) ?: ItemUiState() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),

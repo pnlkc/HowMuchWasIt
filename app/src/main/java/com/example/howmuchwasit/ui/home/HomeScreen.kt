@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -250,19 +251,18 @@ fun SearchResultLazyColumn(
     searchResult: List<String>,
     onSearchItemClicked: (String) -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-        verticalArrangement = if (searchResult.isEmpty()) Arrangement.Center else Arrangement.spacedBy(
-            24.dp
+    if (searchResult.isEmpty()) {
+        ResultEmpty(
+            painterResource = painterResource(id = R.drawable.search_no_result_icon),
+            stringResource = stringResource(id = R.string.no_search_result)
         )
-    ) {
-        if (searchResult.isEmpty()) {
-            item {
-                SearchResultEmpty()
-            }
-        } else {
+    } else {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
             items(searchResult) { item ->
                 SearchResultItem(
                     item = item,
@@ -314,15 +314,18 @@ fun SearchResultItem(
 }
 
 @Composable
-fun SearchResultEmpty(
+fun ResultEmpty(
     modifier: Modifier = Modifier,
+    painterResource: Painter,
+    stringResource: String,
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.search_no_result_icon),
+            painter = painterResource,
             contentDescription = null,
             tint = Black,
             modifier = Modifier
@@ -333,7 +336,7 @@ fun SearchResultEmpty(
 
 
         Text(
-            text = stringResource(id = R.string.no_search_result),
+            text = stringResource,
             style = Typography.h3,
         )
 

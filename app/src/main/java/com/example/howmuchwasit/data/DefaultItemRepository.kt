@@ -14,7 +14,7 @@ class DefaultItemRepository @Inject constructor(private val itemDao: ItemDao) : 
 
     override fun getItemsListStream(name: String): Flow<List<Item>> = itemDao.getItemsList(name)
 
-    override fun getLowestItemStream(name: String): Flow<Item> = itemDao.getLowestItem(name)
+    override fun getLowestItemStream(name: String): Flow<Item?> = itemDao.getLowestItem(name)
 
     override fun getItemStream(id: Int): Flow<Item> = itemDao.getItem(id)
 

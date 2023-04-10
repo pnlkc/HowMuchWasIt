@@ -16,10 +16,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
+import com.example.howmuchwasit.ui.home.ResultEmpty
 import com.example.howmuchwasit.ui.item.viewmodel.AllItemNameListViewModel
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.Black
@@ -71,17 +74,24 @@ fun AllItemLazyList(
     itemList: List<String>,
     onItemClick: (String) -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(items = itemList, key = { it }) { item ->
-            AllItemNameListLazyColumnItem(
-                item = item,
-                onItemClick = onItemClick,
-            )
+    if (itemList.isEmpty()) {
+        ResultEmpty(
+            painterResource = painterResource(id = R.drawable.no_item_list),
+            stringResource = stringResource(id = R.string.no_list)
+        )
+    } else {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items = itemList, key = { it }) { item ->
+                AllItemNameListLazyColumnItem(
+                    item = item,
+                    onItemClick = onItemClick,
+                )
+            }
         }
     }
 }

@@ -18,4 +18,6 @@
     <string name="recent_item">최근 항목</string>
     <string name="no_search_result">검색 결과가 없습니다</string>
     <string name="item_list">목록</string>
+    <string name="no_item">구매 기록이 존재하지 않습니다</string>
+    <string name="no_list">목록이 존재하지 않습니다.</string>
 </resources>

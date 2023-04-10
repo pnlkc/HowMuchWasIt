@@ -1,6 +1,5 @@
 package com.example.howmuchwasit.ui.item.screen
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -13,6 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -24,7 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.item.ItemListUiState
+import com.example.howmuchwasit.ui.home.ResultEmpty
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.oneProductPrice
@@ -40,8 +42,6 @@ fun ItemListScreen(
     canNavigateBack: Boolean = true,
     viewModel: ItemListViewModel = hiltViewModel(),
 ) {
-    val itemListUiState by viewModel.itemListUiState.collectAsState()
-    val itemUiState by viewModel.itemUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(topBar = {
@@ -53,8 +53,7 @@ fun ItemListScreen(
     }) { innerPadding ->
         ItemListBody(
             modifier = modifier.padding(innerPadding),
-            lowestItem = itemUiState,
-            itemList = itemListUiState,
+            viewModel = viewModel,
             onItemClick = navigateToItemEdit,
         ) {
             coroutineScope.launch {
@@ -67,15 +66,13 @@ fun ItemListScreen(
 @Composable
 fun ItemListBody(
     modifier: Modifier = Modifier,
-    lowestItem: ItemUiState,
-    itemList: ItemListUiState,
+    viewModel: ItemListViewModel,
     onItemClick: (Int) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
     ItemListLazyColumn(
         modifier = modifier,
-        lowestItem = lowestItem,
-        itemList = itemList,
+        viewModel = viewModel,
         onItemClick = { onItemClick(it.id) },
         onItemLongClick = onItemLongClick
     )
@@ -85,98 +82,39 @@ fun ItemListBody(
 @Composable
 fun ItemListLazyColumn(
     modifier: Modifier = Modifier,
-    lowestItem: ItemUiState,
-    itemList: ItemListUiState,
+    viewModel: ItemListViewModel,
     onItemClick: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
-    ) {
-        // 최근 항목, 전체 목록 모드 체크
-        if (lowestItem.isValid()) {
-            item {
-                LowestItem(
-                    item = lowestItem
-                )
-            }
-        }
+    val itemList by viewModel.itemListUiState.collectAsState()
+    val lowestItem by viewModel.itemUiState.collectAsState()
 
-        Log.d("로그", "itemList 사이즈 = ${itemList.itemList.size}")
-
-        if (itemList.itemList.isEmpty()) {
-            item {
-                Text("기록이 존재하지 않습니다")
+    if (itemList.itemList.isEmpty()) {
+        ResultEmpty(
+            painterResource = painterResource(id = R.drawable.no_item_list),
+            stringResource = stringResource(id = R.string.no_item)
+        )
+    } else {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            if (lowestItem.isValid()) {
+                item {
+                    LowestItem(
+                        item = lowestItem
+                    )
+                }
             }
-        } else {
+
             items(items = itemList.itemList, key = { it.id }) { item ->
                 ItemListLazyColumnItem(
                     modifier = modifier.animateItemPlacement(),
                     item = item,
                     onItemClick = onItemClick,
                     onItemLongClick = onItemLongClick
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun LowestItem(
-    modifier: Modifier = Modifier,
-    item: ItemUiState,
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        elevation = 2.dp,
-        border = BorderStroke(width = 2.dp, color = Pink)
-    ) {
-        Column(
-            modifier = modifier
-                .background(White)
-                .padding(top = 8.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = item.date,
-                style = Typography.body1,
-                color = Gray
-            )
-
-            Divider(color = Pink)
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "최저가",
-                    style = Typography.h3,
-                    fontWeight = FontWeight.Bold,
-                    color = LightRed
-                )
-
-                val priceSpannable = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
-                        append("개당 ")
-                    }
-                    append(item.oneProductPrice().toString())
-                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
-                        append(" 원")
-                    }
-                }
-
-                Text(
-                    text = priceSpannable,
-                    style = Typography.h3,
-                    color = Black
                 )
             }
         }
@@ -336,4 +274,63 @@ fun DeleteDialog(
         backgroundColor = White,
         contentColor = contentColorFor(backgroundColor = White),
     )
+}
+
+@Composable
+fun LowestItem(
+    modifier: Modifier = Modifier,
+    item: ItemUiState,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        elevation = 2.dp,
+        border = BorderStroke(width = 2.dp, color = Pink)
+    ) {
+        Column(
+            modifier = modifier
+                .background(White)
+                .padding(top = 8.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = item.date,
+                style = Typography.body1,
+                color = Gray
+            )
+
+            Divider(color = Pink)
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "최저가",
+                    style = Typography.h3,
+                    fontWeight = FontWeight.Bold,
+                    color = LightRed
+                )
+
+                val priceSpannable = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
+                        append("개당 ")
+                    }
+                    append(item.oneProductPrice().toString())
+                    withStyle(style = SpanStyle(fontSize = Typography.h3.fontSize * 0.7f)) {
+                        append(" 원")
+                    }
+                }
+
+                Text(
+                    text = priceSpannable,
+                    style = Typography.h3,
+                    color = Black
+                )
+            }
+        }
+    }
 }
