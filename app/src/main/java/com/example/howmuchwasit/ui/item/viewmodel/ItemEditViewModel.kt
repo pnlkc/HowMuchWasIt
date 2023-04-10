@@ -12,12 +12,15 @@ import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.toItem
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.EditItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class ItemEditViewModel(
+@HiltViewModel
+class ItemEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val itemRepository: ItemRepository
 ) : ViewModel() {

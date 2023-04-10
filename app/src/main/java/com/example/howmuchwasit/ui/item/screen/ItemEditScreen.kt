@@ -6,10 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.howmuchwasit.ui.AppViewModelProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.item.screen.ItemAddBody
 import com.example.howmuchwasit.ui.item.viewmodel.ItemEditViewModel
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
@@ -20,7 +18,7 @@ fun ItemEditScreen(
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: ItemEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ItemEditViewModel = hiltViewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
 

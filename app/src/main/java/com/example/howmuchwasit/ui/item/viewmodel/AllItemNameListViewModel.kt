@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.ui.item.ItemNameListUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class AllItemNameListViewModel(
+@HiltViewModel
+class AllItemNameListViewModel @Inject constructor(
     private val itemRepository: ItemRepository
 ) : ViewModel() {
     val itemNameListUiState: StateFlow<ItemNameListUiState> = itemRepository.getAllItemsNameStream()

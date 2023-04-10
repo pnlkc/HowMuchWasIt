@@ -8,10 +8,13 @@ import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.toItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class ItemAddViewModel(
+@HiltViewModel
+class ItemAddViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
 ) : ViewModel() {
     // private set으로 외부에서는 수정 불가능하게 설정

@@ -6,7 +6,6 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.howmuchwasit.ui.home.HomeScreen
-import com.example.howmuchwasit.ui.item.*
 import com.example.howmuchwasit.ui.item.screen.*
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.*
 
@@ -59,7 +58,7 @@ fun HowMuchWasItNavHost(
             arguments = listOf(navArgument(ItemList.nameArg) { type = NavType.StringType })
         ) {
             ItemListScreen(
-                navigateToHome = { navController.popBackStack() },
+                navigateToAllItemNameList = { navController.popBackStack() },
                 navigateToItemEdit = { navController.navigate(route = "${EditItem.route}/${it}") },
             )
         }

@@ -33,9 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.howmuchwasit.R
-import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isPriceDigitsOnly
@@ -57,7 +56,7 @@ fun ItemAddScreen(
     onNavigateUp: () -> Unit,
     navigateToAllItemList: () -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: ItemAddViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ItemAddViewModel = hiltViewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -393,19 +392,14 @@ fun DatePicker(
                     )
                     .padding(24.dp)
             ) {
-                val date = LocalDate.parse(
-                    itemUiState.date,
-                    DateTimeFormatter.ofPattern("yyyy / M / d")
-                )
-
                 Text(
-                    text = date.format(DateTimeFormatter.ofPattern("yyyy년")),
+                    text = datePick.value.format(DateTimeFormatter.ofPattern("yyyy년")),
                     style = MaterialTheme.typography.h6,
                     color = LightGray
                 )
 
                 Text(
-                    text = date.format(DateTimeFormatter.ofPattern("M월 d일 (E)")),
+                    text = datePick.value.format(DateTimeFormatter.ofPattern("M월 d일 (E)")),
                     style = MaterialTheme.typography.h4,
                     color = White
                 )

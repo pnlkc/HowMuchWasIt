@@ -31,9 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.howmuchwasit.R
-import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.Home
 import com.example.howmuchwasit.ui.theme.*
@@ -46,7 +45,7 @@ fun HomeScreen(
     navigateToRecentItemList: () -> Unit,
     navigateToItemList: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeScreenViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: HomeScreenViewModel = hiltViewModel<HomeScreenViewModel>(),
 ) {
     Scaffold(
         topBar = {

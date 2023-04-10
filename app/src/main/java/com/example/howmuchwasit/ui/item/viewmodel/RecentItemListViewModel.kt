@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.Item
 import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.ui.item.ItemListUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class RecentItemListViewModel(
+@HiltViewModel
+class RecentItemListViewModel @Inject constructor(
     private val itemRepository: ItemRepository
 ) : ViewModel() {
     // private set으로 외부에서는 수정 불가능하게 설정

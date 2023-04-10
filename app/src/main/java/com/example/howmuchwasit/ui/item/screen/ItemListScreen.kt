@@ -1,5 +1,6 @@
 package com.example.howmuchwasit.ui.item.screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -19,11 +20,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.data.Item
-import com.example.howmuchwasit.ui.AppViewModelProvider
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
+import com.example.howmuchwasit.ui.item.ItemListUiState
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.oneProductPrice
@@ -34,10 +35,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun ItemListScreen(
     modifier: Modifier = Modifier,
-    navigateToHome: () -> Unit,
+    navigateToAllItemNameList: () -> Unit,
     navigateToItemEdit: (Int) -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: ItemListViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ItemListViewModel = hiltViewModel(),
 ) {
     val itemListUiState by viewModel.itemListUiState.collectAsState()
     val itemUiState by viewModel.itemUiState.collectAsState()
@@ -47,36 +48,35 @@ fun ItemListScreen(
         HowMuchWasItTopAppBar(
             title = viewModel.name,
             canNavigateBack = canNavigateBack,
-            navigateUp = navigateToHome
+            navigateUp = navigateToAllItemNameList
         )
     }) { innerPadding ->
         ItemListBody(
             modifier = modifier.padding(innerPadding),
             lowestItem = itemUiState,
-            itemList = itemListUiState.itemList,
+            itemList = itemListUiState,
             onItemClick = navigateToItemEdit,
-            onItemLongClick = {
-                coroutineScope.launch {
-                    viewModel.deleteItem(it)
-                }
+        ) {
+            coroutineScope.launch {
+                viewModel.deleteItem(it)
             }
-        )
+        }
     }
 }
 
 @Composable
 fun ItemListBody(
     modifier: Modifier = Modifier,
-    lowestItem: ItemUiState?,
-    itemList: List<Item>,
+    lowestItem: ItemUiState,
+    itemList: ItemListUiState,
     onItemClick: (Int) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
     ItemListLazyColumn(
+        modifier = modifier,
         lowestItem = lowestItem,
         itemList = itemList,
         onItemClick = { onItemClick(it.id) },
-        modifier = modifier,
         onItemLongClick = onItemLongClick
     )
 }
@@ -85,8 +85,8 @@ fun ItemListBody(
 @Composable
 fun ItemListLazyColumn(
     modifier: Modifier = Modifier,
-    lowestItem: ItemUiState?,
-    itemList: List<Item>,
+    lowestItem: ItemUiState,
+    itemList: ItemListUiState,
     onItemClick: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
@@ -96,7 +96,8 @@ fun ItemListLazyColumn(
             .padding(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        if (lowestItem != null && lowestItem.isValid()) {
+        // 최근 항목, 전체 목록 모드 체크
+        if (lowestItem.isValid()) {
             item {
                 LowestItem(
                     item = lowestItem
@@ -104,13 +105,21 @@ fun ItemListLazyColumn(
             }
         }
 
-        items(items = itemList, key = { it.id }) { item ->
-            ItemListLazyColumnItem(
-                modifier = modifier.animateItemPlacement(),
-                item = item,
-                onItemClick = onItemClick,
-                onItemLongClick = onItemLongClick
-            )
+        Log.d("로그", "itemList 사이즈 = ${itemList.itemList.size}")
+
+        if (itemList.itemList.isEmpty()) {
+            item {
+                Text("기록이 존재하지 않습니다")
+            }
+        } else {
+            items(items = itemList.itemList, key = { it.id }) { item ->
+                ItemListLazyColumnItem(
+                    modifier = modifier.animateItemPlacement(),
+                    item = item,
+                    onItemClick = onItemClick,
+                    onItemLongClick = onItemLongClick
+                )
+            }
         }
     }
 }
