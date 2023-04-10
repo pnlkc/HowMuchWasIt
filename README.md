@@ -71,3 +71,11 @@
 - 아이템 리스트에서 최저가가 아이템 보여주는 기능 추가
 - Screen 컴포저블과 ViewModedl 클래스 파일 패키지 분리
 <br>
+
+### 230410
+- DI를 Hilt를 사용하여 구현하도록 변경
+- -> 이유: 수동 DI와 Hilt DI를 모두 경험해보기 위해서
+- 아이템 리스트 화면에서 항목이 1개일 때 삭제하면 `E/Perf: getFolderSize() : Exception_1 = java.lang.NullPointerException: Attempt to get length of null array` 발생하는 오류 수정
+- -> 원인: Room DAO에서 쿼리를 통한 결과가 없을 때 Null 처리를 제대로 안해서, 빈 Array에 접근하게 되는 경우가 발생
+- -> 해결: Flow<Item?>을 반환하도록 수정 후 viewmodel에 null일 경우 처리 
+<br>
