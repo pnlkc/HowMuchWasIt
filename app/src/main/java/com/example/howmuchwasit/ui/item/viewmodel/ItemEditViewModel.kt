@@ -8,11 +8,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.ItemRepository
 import com.example.howmuchwasit.data.toItemUiState
+import com.example.howmuchwasit.ui.home.HomeScreenViewModel
+import com.example.howmuchwasit.ui.item.ItemNameListUiState
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.toItem
 import com.example.howmuchwasit.ui.navigation.NavigationDestination.EditItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -30,11 +34,42 @@ class ItemEditViewModel @Inject constructor(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
+    val itemNameListUiState: StateFlow<ItemNameListUiState> = itemRepository.getAllItemsNameStream()
+        .map { ItemNameListUiState(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemNameListUiState()
+        )
+
     // 날짜 선택 다이얼로그 결과 저장용 변수
     val datePick = mutableStateOf(LocalDate.now())
 
+    val searchTerm = MutableStateFlow("")
+
+    // debounce로 검색 기능 구현
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val debounceSearchTerm = searchTerm
+        .debounce(50)
+        .distinctUntilChanged()
+        .flatMapLatest { searchTermValue ->
+            itemRepository.getSearchItemStream(searchTermValue)
+                .map { listItem ->
+                    ItemNameListUiState(listItem)
+                }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemNameListUiState()
+        )
+
     init {
         loadItemUiStateAndSetDateInfo()
+    }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
     }
 
     // itemUiState 값 업데이트

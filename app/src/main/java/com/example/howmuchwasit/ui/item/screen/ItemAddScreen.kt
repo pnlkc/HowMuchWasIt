@@ -3,16 +3,21 @@ package com.example.howmuchwasit.ui.item.screen
 import android.view.ContextThemeWrapper
 import android.widget.CalendarView
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -26,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,15 +40,16 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.howmuchwasit.MainActivity.Companion.screenHeightDp
 import com.example.howmuchwasit.R
 import com.example.howmuchwasit.ui.HowMuchWasItTopAppBar
-import com.example.howmuchwasit.ui.item.ItemUiState
-import com.example.howmuchwasit.ui.item.isPriceDigitsOnly
-import com.example.howmuchwasit.ui.item.isQuantityDigitsOnly
-import com.example.howmuchwasit.ui.item.isValid
+import com.example.howmuchwasit.ui.home.ResultEmpty
+import com.example.howmuchwasit.ui.item.*
 import com.example.howmuchwasit.ui.item.viewmodel.ItemAddViewModel
 import com.example.howmuchwasit.ui.navigation.NavigationDestination
 import com.example.howmuchwasit.ui.theme.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
@@ -54,7 +61,6 @@ fun ItemAddScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
-    navigateToAllItemList: () -> Unit,
     canNavigateBack: Boolean = true,
     viewModel: ItemAddViewModel = hiltViewModel(),
 ) {
@@ -71,14 +77,17 @@ fun ItemAddScreen(
             modifier = modifier.padding(innerPadding),
             navigateBack = navigateBack,
             itemUiState = viewModel.itemUiState,
+            itemNameListUiState = viewModel.itemNameListUiState,
+            searchTerm = viewModel.searchTerm,
+            debounceSearchTerm = viewModel.debounceSearchTerm,
             onItemValueChanged = viewModel::updateItemUiState,
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.saveItem()
-                    navigateToAllItemList()
+                    navigateBack()
                 }
             },
-            datePick = viewModel.datePick
+            datePick = viewModel.datePick,
         )
     }
 }
@@ -92,6 +101,9 @@ fun ItemAddBody(
     onItemValueChanged: (ItemUiState) -> Unit,
     onSaveClick: () -> Unit,
     datePick: MutableState<LocalDate>,
+    itemNameListUiState: StateFlow<ItemNameListUiState>,
+    searchTerm: MutableStateFlow<String>,
+    debounceSearchTerm: StateFlow<ItemNameListUiState>,
 ) {
     // 포커스 관리하는 포커스 매니저
     val focusManager = LocalFocusManager.current
@@ -110,8 +122,11 @@ fun ItemAddBody(
         ItemInputForm(
             navigateBack = navigateBack,
             itemUiState = itemUiState,
+            itemNameListUiState = itemNameListUiState,
+            searchTerm = searchTerm,
+            debounceSearchTerm = debounceSearchTerm,
             onItemValueChanged = onItemValueChanged,
-            datePick = datePick
+            datePick = datePick,
         )
 
         Spacer(modifier = modifier.weight(1f))
@@ -131,9 +146,14 @@ fun ItemInputForm(
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
     datePick: MutableState<LocalDate>,
+    itemNameListUiState: StateFlow<ItemNameListUiState>,
+    searchTerm: MutableStateFlow<String>,
+    debounceSearchTerm: StateFlow<ItemNameListUiState>,
 ) {
     // 컴포저블에 포커스가 있는지 확인하는 변수
     var isFocused by remember { mutableStateOf(false) }
+    var needRecentNameDialog by rememberSaveable { mutableStateOf(false) }
+    val nameList = itemNameListUiState.collectAsState().value.itemNameList
 
     // 포커스 관리하는 포커스 매니저
     val focusManager = LocalFocusManager.current
@@ -158,10 +178,18 @@ fun ItemInputForm(
         ItemAddTextField(
             placeholderText = stringResource(id = R.string.input_product_name),
             leadingIconPainter = painterResource(id = R.drawable.product_name),
+            trailingIconPainter = if (nameList.isEmpty()) {
+                null
+            } else {
+                painterResource(id = R.drawable.outline_restore)
+            },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             value = itemUiState.name,
             itemUiState = itemUiState,
-            onItemValueChanged = onItemValueChanged
+            onItemValueChanged = onItemValueChanged,
+            onRecentItemClick = {
+                needRecentNameDialog = true
+            },
         )
 
         ItemAddTextField(
@@ -173,7 +201,7 @@ fun ItemInputForm(
             ),
             value = itemUiState.price,
             itemUiState = itemUiState,
-            onItemValueChanged = onItemValueChanged
+            onItemValueChanged = onItemValueChanged,
         )
 
         ItemAddTextField(
@@ -185,7 +213,19 @@ fun ItemInputForm(
             ),
             value = itemUiState.quantity,
             itemUiState = itemUiState,
-            onItemValueChanged = onItemValueChanged
+            onItemValueChanged = onItemValueChanged,
+        )
+    }
+
+    if (needRecentNameDialog) {
+        RecentNameDialog(
+            onDismissRequest = {
+                needRecentNameDialog = false
+                searchTerm.value = ""
+            },
+            onSearchItemClicked = { onItemValueChanged(itemUiState.copy(name = it)) },
+            searchTerm = searchTerm,
+            debounceSearchTerm = debounceSearchTerm,
         )
     }
 }
@@ -255,10 +295,12 @@ fun ItemAddTextField(
     modifier: Modifier = Modifier,
     placeholderText: String,
     leadingIconPainter: Painter? = null,
+    trailingIconPainter: Painter? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     value: String,
     itemUiState: ItemUiState,
     onItemValueChanged: (ItemUiState) -> Unit,
+    onRecentItemClick: () -> Unit = { },
 ) {
     // 텍스트 선택 손잡이(textSelectHandle), 텍스트 선택 배경(textColorHighlight) 변경
     val customTextSelectionColors = TextSelectionColors(
@@ -299,6 +341,22 @@ fun ItemAddTextField(
                         contentDescription = null,
                         tint = Black,
                         modifier = modifier.padding(vertical = 16.dp)
+                    )
+                }
+            },
+            trailingIcon = if (trailingIconPainter == null) {
+                null
+            } else {
+                {
+                    Icon(
+                        painter = trailingIconPainter,
+                        contentDescription = null,
+                        tint = Black,
+                        modifier = modifier
+                            .padding(vertical = 16.dp)
+                            .clickable {
+                                onRecentItemClick()
+                            }
                     )
                 }
             },
@@ -481,6 +539,180 @@ fun CustomCalendarView(
 
         }
     )
+}
+
+@Composable
+fun RecentNameDialog(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    onSearchItemClicked: (String) -> Unit,
+    searchTerm: MutableStateFlow<String>,
+    debounceSearchTerm: StateFlow<ItemNameListUiState>,
+) {
+    val name = remember { mutableStateOf("") }
+    val itemList = debounceSearchTerm.collectAsState().value.itemNameList
+    val text = searchTerm.collectAsState().value
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties = DialogProperties(),
+    ) {
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+                .heightIn(max = (screenHeightDp / 3 * 2).dp)
+                .background(
+                    color = White,
+                    shape = Shapes.medium
+                )
+                .animateContentSize()
+        ) {
+            Column(
+                Modifier
+                    .defaultMinSize(minHeight = 72.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = Portage,
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
+                    .padding(24.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.buy_list),
+                    style = MaterialTheme.typography.h3,
+                    color = White
+                )
+            }
+
+            RecentNameDialogInputText(
+                text = text,
+                onValueChange = {
+                    searchTerm.value = it
+                }
+            )
+
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                if (itemList.isEmpty()) {
+                    item {
+                        ResultEmpty(
+                            painterResource = painterResource(id = R.drawable.search_no_result_icon),
+                            stringResource = stringResource(id = R.string.no_search_result),
+                            bottomSpaceOff = true,
+                            modifier = modifier.padding(vertical = 24.dp)
+                        )
+                    }
+                } else {
+                    items(itemList) { string ->
+                        Text(
+                            text = string,
+                            style = Typography.h3,
+                            color = if (name.value == string) Portage else Black,
+                            fontWeight = if (name.value == string) FontWeight.Bold else FontWeight.Medium,
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    name.value = string
+                                }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(bottom = 16.dp, end = 16.dp)
+            ) {
+                TextButton(
+                    onClick = onDismissRequest
+                ) {
+                    Text(
+                        text = "취소",
+                        style = MaterialTheme.typography.button,
+                        color = Portage
+                    )
+                }
+
+                TextButton(
+                    onClick = {
+                        onSearchItemClicked(name.value)
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(
+                        text = "확인",
+                        style = MaterialTheme.typography.button,
+                        color = Portage
+                    )
+                }
+
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentNameDialogInputText(
+    modifier: Modifier = Modifier,
+    text: String,
+    onValueChange: (String) -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+) {
+    // 텍스트 선택 손잡이(textSelectHandle), 텍스트 선택 배경(textColorHighlight) 변경
+    val customTextSelectionColors = TextSelectionColors(
+        handleColor = MediumSlateBlue,
+        backgroundColor = MediumSlateBlue.copy(alpha = 0.2f)
+    )
+
+    // 포커스 관리하는 포커스 매니저
+    val focusManager = LocalFocusManager.current
+
+    // customTextSelectionColors 값 적용
+    CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = {
+                onValueChange(it)
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = Black
+                )
+            },
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.hint),
+                    color = Color.Gray,
+                    style = Typography.h3,
+                )
+            },
+            shape = Shapes.medium,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                unfocusedBorderColor = GraySuit,
+                focusedBorderColor = MediumSlateBlue,
+                cursorColor = MediumSlateBlue,
+                textColor = Black,
+                disabledTextColor = Black
+            ),
+            textStyle = Typography.h3,
+            singleLine = true,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp, horizontal = 12.dp),
+        )
+    }
 }
 
 @Preview(showBackground = false)

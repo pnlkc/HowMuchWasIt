@@ -40,7 +40,10 @@ fun ItemEditScreen(
                     navigateBack()
                 }
             },
-            datePick = viewModel.datePick
+            datePick = viewModel.datePick,
+            itemNameListUiState = viewModel.itemNameListUiState,
+            searchTerm = viewModel.searchTerm,
+            debounceSearchTerm = viewModel.debounceSearchTerm,
         )
     }
 }

@@ -4,11 +4,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.howmuchwasit.data.ItemRepository
+import com.example.howmuchwasit.ui.item.ItemNameListUiState
 import com.example.howmuchwasit.ui.item.ItemUiState
 import com.example.howmuchwasit.ui.item.isValid
 import com.example.howmuchwasit.ui.item.toItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -21,12 +26,45 @@ class ItemAddViewModel @Inject constructor(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
+    // 아이템 이름 리스트
+    val itemNameListUiState: StateFlow<ItemNameListUiState> = itemRepository.getAllItemsNameStream()
+        .map { ItemNameListUiState(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemNameListUiState()
+        )
+
     // 날짜 선택 다이얼로그 결과 저장용 변수
     val datePick = mutableStateOf(LocalDate.now())
+
+    val searchTerm = MutableStateFlow("")
+
+    // debounce로 검색 기능 구현
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val debounceSearchTerm = searchTerm
+        .debounce(50)
+        .distinctUntilChanged()
+        .flatMapLatest { searchTermValue ->
+            itemRepository.getSearchItemStream(searchTermValue)
+                .map { listItem ->
+                    ItemNameListUiState(listItem)
+                }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ItemNameListUiState()
+        )
 
     init {
         initItemUiState()
     }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
+    }
+
 
     // itemUiState 값 업데이트
     fun updateItemUiState(newItemUiState: ItemUiState) {

@@ -35,12 +35,6 @@ fun HowMuchWasItNavHost(
             ItemAddScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
-                navigateToAllItemList = {
-                    navController.navigate(
-                        route = AllItemNameList.route,
-                        navOptions = NavOptions.Builder().setPopUpTo(Home.route, false).build()
-                    )
-                }
             )
         }
 

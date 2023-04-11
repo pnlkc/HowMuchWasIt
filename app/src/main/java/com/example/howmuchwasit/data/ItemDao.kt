@@ -23,7 +23,7 @@ interface ItemDao {
     @Query("SELECT * FROM products WHERE name = :name ORDER BY onePrice ASC LIMIT 1")
     fun getLowestItem(name: String): Flow<Item?>
 
-    @Query("SELECT name FROM products GROUP BY name")
+    @Query("SELECT name FROM products GROUP BY name ORDER BY name ASC")
     fun getAllItemsName(): Flow<List<String>>
 
     @Query("SELECT * FROM products WHERE REPLACE(date, ' / ', '-') > DATE('now', '-3 months') ORDER BY date DESC, name ASC")

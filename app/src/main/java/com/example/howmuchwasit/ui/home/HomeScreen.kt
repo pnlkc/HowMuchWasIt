@@ -46,7 +46,7 @@ fun HomeScreen(
     navigateToRecentItemList: () -> Unit,
     navigateToItemList: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeScreenViewModel = hiltViewModel<HomeScreenViewModel>(),
+    viewModel: HomeScreenViewModel = hiltViewModel(),
 ) {
     Scaffold(
         topBar = {
@@ -318,9 +318,11 @@ fun ResultEmpty(
     modifier: Modifier = Modifier,
     painterResource: Painter,
     stringResource: String,
+    bottomSpaceOff: Boolean = false
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -340,6 +342,6 @@ fun ResultEmpty(
             style = Typography.h3,
         )
 
-        Spacer(modifier = Modifier.size(50.dp))
+        if (!bottomSpaceOff) Spacer(modifier = Modifier.size(50.dp))
     }
 }
