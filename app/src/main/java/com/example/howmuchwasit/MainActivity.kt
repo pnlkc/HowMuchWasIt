@@ -1,7 +1,6 @@
 package com.example.howmuchwasit
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.howmuchwasit.ui.HowMuchWasItApp
@@ -21,7 +20,7 @@ class MainActivity : ComponentActivity() {
         val displayMetrics = resources.displayMetrics
         screenHeightDp = displayMetrics.heightPixels / displayMetrics.density
 
-        Log.d("로그", "screenHeightDp = $screenHeightDp")
+//        Log.d("로그", "screenHeightDp = $screenHeightDp")
 
 
         setContent {

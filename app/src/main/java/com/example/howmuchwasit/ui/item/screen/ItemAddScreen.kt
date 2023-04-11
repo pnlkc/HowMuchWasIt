@@ -560,7 +560,7 @@ fun RecentNameDialog(
         Column(
             modifier = Modifier
                 .wrapContentSize()
-                .heightIn(max = (screenHeightDp / 3 * 2).dp)
+                .heightIn(max = (screenHeightDp / 4 * 3).dp)
                 .background(
                     color = White,
                     shape = Shapes.medium
@@ -569,7 +569,6 @@ fun RecentNameDialog(
         ) {
             Column(
                 Modifier
-                    .defaultMinSize(minHeight = 72.dp)
                     .fillMaxWidth()
                     .background(
                         color = Portage,
@@ -588,72 +587,75 @@ fun RecentNameDialog(
                 text = text,
                 onValueChange = {
                     searchTerm.value = it
+                    name.value = ""
                 }
             )
 
-            LazyColumn(
+            Box(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                    .wrapContentSize()
             ) {
-                if (itemList.isEmpty()) {
-                    item {
-                        ResultEmpty(
-                            painterResource = painterResource(id = R.drawable.search_no_result_icon),
-                            stringResource = stringResource(id = R.string.no_search_result),
-                            bottomSpaceOff = true,
-                            modifier = modifier.padding(vertical = 24.dp)
-                        )
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, bottom = 64.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                ) {
+                    if (itemList.isEmpty()) {
+                        item {
+                            ResultEmpty(
+                                painterResource = painterResource(id = R.drawable.search_no_result_icon),
+                                stringResource = stringResource(id = R.string.no_search_result),
+                                bottomSpaceOff = true,
+                                modifier = modifier.padding(vertical = 24.dp)
+                            )
+                        }
+                    } else {
+                        items(itemList) { string ->
+                            Text(
+                                text = string,
+                                style = Typography.h3,
+                                color = if (name.value == string) Portage else Black,
+                                fontWeight = if (name.value == string) FontWeight.Bold else FontWeight.Medium,
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        name.value = string
+                                    }
+                            )
+                        }
                     }
-                } else {
-                    items(itemList) { string ->
+                }
+
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 16.dp, end = 16.dp)
+                        .heightIn(max = 32.dp)
+                ) {
+                    TextButton(
+                        onClick = onDismissRequest
+                    ) {
                         Text(
-                            text = string,
-                            style = Typography.h3,
-                            color = if (name.value == string) Portage else Black,
-                            fontWeight = if (name.value == string) FontWeight.Bold else FontWeight.Medium,
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    name.value = string
-                                }
+                            text = "취소",
+                            style = MaterialTheme.typography.button,
+                            color = Portage
+                        )
+                    }
+
+                    TextButton(
+                        onClick = {
+                            onSearchItemClicked(name.value)
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text(
+                            text = "확인",
+                            style = MaterialTheme.typography.button,
+                            color = Portage
                         )
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(bottom = 16.dp, end = 16.dp)
-            ) {
-                TextButton(
-                    onClick = onDismissRequest
-                ) {
-                    Text(
-                        text = "취소",
-                        style = MaterialTheme.typography.button,
-                        color = Portage
-                    )
-                }
-
-                TextButton(
-                    onClick = {
-                        onSearchItemClicked(name.value)
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(
-                        text = "확인",
-                        style = MaterialTheme.typography.button,
-                        color = Portage
-                    )
-                }
-
             }
         }
     }
