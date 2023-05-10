@@ -17,7 +17,7 @@ interface ItemDao {
     @Query("SELECT * FROM products WHERE id = :id")
     fun getItem(id: Int): Flow<Item>
 
-    @Query("SELECT * FROM products WHERE name = :name")
+    @Query("SELECT * FROM products WHERE name = :name ORDER BY date DESC, name ASC")
     fun getItemsList(name: String): Flow<List<Item>>
 
     @Query("SELECT * FROM products WHERE name = :name ORDER BY onePrice ASC LIMIT 1")
